@@ -1,6 +1,5 @@
 package org.vinhveer.message.Services.Impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,17 +15,20 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
 
     // Procedure for user
-    private boolean userExist(String email, String userId) {
-        return userRepository.findByEmailAndId(email, userId) != null;
+    private boolean userExist(String email) {
+        return userRepository.findByEmail(email) != null;
     }
 
     private boolean userContainsNull(User user) {
-        return user.getId() == null || user.getFullName() == null
+        return user.getFullName() == null
                 || user.getEmail() == null || user.getPassword() == null
                 || user.getDateOfBirth() == null || user.getAvatar() == null;
     }
@@ -40,7 +42,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<String> createUser(User user) {
-        if (userExist(user.getEmail(), user.getId())) {
+        if (userExist(user.getEmail())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists");
         }
 
@@ -52,7 +54,7 @@ public class UserServiceImpl implements UserService {
             userRepository.save(user);
             return ResponseEntity.status(HttpStatus.CREATED).body("User created successfully");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request" + e);
         }
     }
 
@@ -71,17 +73,37 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<String> updateUser(User user) {
-        if (!userExist(user.getEmail(), user.getId())) {
+        if (!userExist(user.getEmail())) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
         try {
-            userRepository.save(user);
+            User existingUser = userRepository.findByEmail(user.getEmail());
+
+            if (user.getFullName() != null) {
+                existingUser.setFullName(user.getFullName());
+            }
+            if (user.getDateOfBirth() != null) {
+                existingUser.setDateOfBirth(user.getDateOfBirth());
+            }
+            if (user.getAvatar() != null) {
+                existingUser.setAvatar(user.getAvatar());
+            }
+            if (user.getPassword() != null) {
+                existingUser.setPassword(user.getPassword());
+            }
+            if (user.isGender() != existingUser.isGender()) {
+                existingUser.setGender(user.isGender());
+            }
+
+            userRepository.save(existingUser);
+
             return ResponseEntity.status(HttpStatus.OK).body("User updated successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
         }
     }
+
 
     @Override
     public ResponseEntity<String> checkUser(String email, String password) {
