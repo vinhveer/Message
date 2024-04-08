@@ -104,7 +104,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-
     @Override
     public ResponseEntity<String> checkUser(String email, String password) {
         if (email == null || password == null) {

@@ -6,14 +6,14 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
-import java.util.ArrayList;
+
 @Document
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Conversations {
+public class Conversation {
     @Id
     private String id;
-    private List<String> participants = new ArrayList<>();
-    private List<String> messages = new ArrayList<>();
+    private String conservationName;
+    private List<String> participantId;
 }

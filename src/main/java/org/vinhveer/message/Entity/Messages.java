@@ -13,7 +13,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Messages {
     @Id
     private String id;
-    private String senderId;
+    private String conservationId;
+    private String userId;
+    private String type;
     private String content;
     private long timestamp;
 }
