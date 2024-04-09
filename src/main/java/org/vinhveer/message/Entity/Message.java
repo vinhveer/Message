@@ -10,12 +10,20 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Messages {
+public class Message {
     @Id
     private String id;
     private String conservationId;
     private String userId;
-    private String type;
+    private Type type;
     private String content;
     private long timestamp;
+
+    public enum Type {
+        TEXT,
+        IMAGE,
+        VIDEO,
+        AUDIO,
+        FILE
+    }
 }
