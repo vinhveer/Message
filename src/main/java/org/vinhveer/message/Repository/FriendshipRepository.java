@@ -8,7 +8,7 @@ import java.util.List;
 
 @Repository
 public interface FriendshipRepository extends MongoRepository<Friendship, String> {
-//    List<Friendship> findByUserId(String userId);
+    Friendship findByUserId(String userId);
     Friendship findByUserIdAndFriendId(String userId, String friendId);
 
     List<Friendship> findByFriendIdAndStatus(String userId, Friendship.FriendshipStatus friendshipStatus);
