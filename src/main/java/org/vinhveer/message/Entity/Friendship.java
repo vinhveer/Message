@@ -10,11 +10,16 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Friendships {
+public class Friendship {
     @Id
     private String id;
     private String userId;
     private String friendId;
-    private String status;
+    private FriendshipStatus status;
     private long timestamp;
+
+    public enum FriendshipStatus {
+        PENDING,
+        ACCEPTED
+    }
 }
