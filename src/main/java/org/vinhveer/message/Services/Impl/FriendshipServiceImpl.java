@@ -39,7 +39,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         return ResponseEntity.ok("Friend request sent successfully.");
     }
     private Friendship getPendingFriendship(String requestId) {
-        Optional<Friendship> friendshipOptional = friendshipRepository.findById(requestId);
+        Optional<Friendship> friendshipOptional = Optional.ofNullable(friendshipRepository.findByUserId(requestId));
 
         if (friendshipOptional.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Friend request not found");
@@ -54,9 +54,14 @@ public class FriendshipServiceImpl implements FriendshipService {
         return friendship;
     }
     @Override
-    public ResponseEntity<String> acceptFriendRequest(String requestId) {
+    public ResponseEntity<String> acceptFriendRequest(String userId, String requestId) {
         try {
             Friendship friendship = getPendingFriendship(requestId);
+
+            if (!friendship.getFriendId().equals(userId)) {
+                return ResponseEntity.badRequest().body("User is not authorized to accept this friend request");
+            }
+
             friendship.setStatus(Friendship.FriendshipStatus.ACCEPTED);
             friendshipRepository.save(friendship);
             return ResponseEntity.ok("Friend request accepted successfully");
@@ -66,9 +71,14 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     @Override
-    public ResponseEntity<String> rejectFriendRequest(String requestId) {
+    public ResponseEntity<String> rejectFriendRequest(String userId, String requestId) {
         try {
             Friendship friendship = getPendingFriendship(requestId);
+
+            if (!friendship.getFriendId().equals(userId)) {
+                return ResponseEntity.badRequest().body("User is not authorized to reject this friend request");
+            }
+
             friendshipRepository.delete(friendship);
             return ResponseEntity.ok("Friend request rejected successfully");
         } catch (ResponseStatusException e) {
