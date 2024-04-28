@@ -25,13 +25,13 @@ public class FriendshipController {
     }
 
     @PostMapping("/accept")
-    public ResponseEntity<String> acceptFriendRequest(@RequestParam String userId, @RequestParam String requestId) {
-        return friendshipService.acceptFriendRequest(userId, requestId);
+    public ResponseEntity<String> acceptFriendRequest(@RequestParam String senderId, @RequestParam String receiverId) {
+        return friendshipService.acceptFriendRequest(senderId, receiverId);
     }
 
     @PostMapping("/reject")
-    public ResponseEntity<String> rejectFriendRequest(@RequestParam String userId, @RequestParam String requestId) {
-        return friendshipService.rejectFriendRequest(userId, requestId);
+    public ResponseEntity<String> rejectFriendRequest(@RequestParam String senderId, @RequestParam String receiverId) {
+        return friendshipService.rejectFriendRequest(senderId, receiverId);
     }
 
     @DeleteMapping("/remove/{friendshipId}")
@@ -39,9 +39,9 @@ public class FriendshipController {
         return friendshipService.removeFriend(friendshipId);
     }
 
-    @GetMapping("/requests/{userId}")
-    public List<Friendship> getFriendshipRequests(@PathVariable String userId) {
-        return friendshipService.getFriendshipRequests(userId);
+    @GetMapping("/requests/{receiverId}")
+    public List<Friendship> getFriendshipRequests(@PathVariable String receiverId) {
+        return friendshipService.getFriendshipRequests(receiverId);
     }
 
     @GetMapping("/friends/{userId}")

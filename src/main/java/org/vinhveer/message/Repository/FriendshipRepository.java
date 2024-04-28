@@ -8,10 +8,12 @@ import java.util.List;
 
 @Repository
 public interface FriendshipRepository extends MongoRepository<Friendship, String> {
-    Friendship findByUserId(String userId);
-    Friendship findByUserIdAndFriendId(String userId, String friendId);
+    // Update method names and parameters to use new field names
+    Friendship findBySenderId(String senderId);
+    Friendship findBySenderIdAndReceiverId(String senderId, String receiverId);
 
-    List<Friendship> findByFriendIdAndStatus(String userId, Friendship.FriendshipStatus friendshipStatus);
+    List<Friendship> findByReceiverIdAndStatus(String receiverId, Friendship.FriendshipStatus friendshipStatus);
 
-    List<Friendship> findByUserIdAndStatusOrFriendIdAndStatus(String userId, Friendship.FriendshipStatus friendshipStatus, String userId1, Friendship.FriendshipStatus friendshipStatus1);
+    // This method combines queries for sender and receiver status, so parameters need to be adjusted accordingly.
+    List<Friendship> findBySenderIdAndStatusOrReceiverIdAndStatus(String senderId, Friendship.FriendshipStatus senderStatus, String receiverId, Friendship.FriendshipStatus receiverStatus);
 }

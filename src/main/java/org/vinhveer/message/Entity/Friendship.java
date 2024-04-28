@@ -13,8 +13,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Friendship {
     @Id
     private String id;
-    private String userId;
-    private String friendId;
+    private String senderId;
+    private String receiverId;
     private FriendshipStatus status;
     private long timestamp;
 
