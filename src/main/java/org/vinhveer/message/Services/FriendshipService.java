@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface FriendshipService {
     ResponseEntity<String> sendFriendRequest(String senderId, String receiverId);
-    ResponseEntity<String> acceptFriendRequest(String userId, String requestId);
-    ResponseEntity<String> rejectFriendRequest(String userId, String requestId);
+    ResponseEntity<String> acceptFriendRequest(String senderId, String receiverId);
+    ResponseEntity<String> rejectFriendRequest(String senderId, String receiverId);
     ResponseEntity<String> removeFriend(String friendshipId);
-    List<Friendship> getFriendshipRequests(String userId);
+    List<Friendship> getFriendshipRequests(String receiverId);
     List<Friendship> getFriends(String userId);
 }

@@ -23,14 +23,14 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     public ResponseEntity<String> sendFriendRequest(String senderId, String receiverId) {
-        Optional<Friendship> existingFriendship = Optional.ofNullable(friendshipRepository.findByUserIdAndFriendId(senderId, receiverId));
+        Optional<Friendship> existingFriendship = Optional.ofNullable(friendshipRepository.findBySenderIdAndReceiverId(senderId, receiverId));
         if (existingFriendship.isPresent()) {
             return ResponseEntity.badRequest().body("A friendship or request already exists between these users.");
         }
 
         Friendship newFriendship = new Friendship();
-        newFriendship.setUserId(senderId);
-        newFriendship.setFriendId(receiverId);
+        newFriendship.setSenderId(senderId);
+        newFriendship.setReceiverId(receiverId);
         newFriendship.setStatus(Friendship.FriendshipStatus.PENDING);
         newFriendship.setTimestamp(System.currentTimeMillis());
 
@@ -38,8 +38,8 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         return ResponseEntity.ok("Friend request sent successfully.");
     }
-    private Friendship getPendingFriendship(String requestId) {
-        Optional<Friendship> friendshipOptional = Optional.ofNullable(friendshipRepository.findByUserId(requestId));
+    private Friendship getPendingFriendship(String senderID) {
+        Optional<Friendship> friendshipOptional = Optional.ofNullable(friendshipRepository.findBySenderId(senderID));
 
         if (friendshipOptional.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Friend request not found");
@@ -54,11 +54,11 @@ public class FriendshipServiceImpl implements FriendshipService {
         return friendship;
     }
     @Override
-    public ResponseEntity<String> acceptFriendRequest(String userId, String requestId) {
+    public ResponseEntity<String> acceptFriendRequest(String senderId, String receiverId) {
         try {
-            Friendship friendship = getPendingFriendship(requestId);
+            Friendship friendship = getPendingFriendship(senderId);
 
-            if (!friendship.getFriendId().equals(userId)) {
+            if (!friendship.getReceiverId().equals(receiverId)) {
                 return ResponseEntity.badRequest().body("User is not authorized to accept this friend request");
             }
 
@@ -71,11 +71,11 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     @Override
-    public ResponseEntity<String> rejectFriendRequest(String userId, String requestId) {
+    public ResponseEntity<String> rejectFriendRequest(String senderId, String receiverId) {
         try {
-            Friendship friendship = getPendingFriendship(requestId);
+            Friendship friendship = getPendingFriendship(senderId);
 
-            if (!friendship.getFriendId().equals(userId)) {
+            if (!friendship.getReceiverId().equals(receiverId)) {
                 return ResponseEntity.badRequest().body("User is not authorized to reject this friend request");
             }
 
@@ -104,15 +104,15 @@ public class FriendshipServiceImpl implements FriendshipService {
 
 
     @Override
-    public List<Friendship> getFriendshipRequests(String userId) {
-        return friendshipRepository.findByFriendIdAndStatus(userId, Friendship.FriendshipStatus.PENDING);
+    public List<Friendship> getFriendshipRequests(String receiverId) {
+        return friendshipRepository.findByReceiverIdAndStatus(receiverId, Friendship.FriendshipStatus.PENDING);
     }
 
 
 
     @Override
     public List<Friendship> getFriends(String userId) {
-        return friendshipRepository.findByUserIdAndStatusOrFriendIdAndStatus(userId, Friendship.FriendshipStatus.ACCEPTED, userId, Friendship.FriendshipStatus.ACCEPTED);
+        return friendshipRepository.findBySenderIdAndStatusOrReceiverIdAndStatus(userId, Friendship.FriendshipStatus.ACCEPTED, userId, Friendship.FriendshipStatus.ACCEPTED);
     }
 
 
