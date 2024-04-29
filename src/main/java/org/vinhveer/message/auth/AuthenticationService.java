@@ -8,7 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.vinhveer.message.Entity.User;
 import org.vinhveer.message.Repository.UserRepository;
-import org.vinhveer.message.config.JwtService;
+import org.vinhveer.message.Config.JwtService;
 
 @Service
 @RequiredArgsConstructor

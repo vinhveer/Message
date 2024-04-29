@@ -1,4 +1,4 @@
-package org.vinhveer.message.config;
+package org.vinhveer.message.Config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
