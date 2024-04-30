@@ -1,4 +1,4 @@
-package org.vinhveer.message.auth;
+package org.vinhveer.message.Auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
