@@ -1,4 +1,4 @@
-package org.vinhveer.message.Controller;
+package org.vinhveer.message.RestController;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
