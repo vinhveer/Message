@@ -11,31 +11,51 @@
 </head>
 
 <body>
+    <nav class="navbar navbar-dark bg-dark navbar-expand-sm fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">MessageApp</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="index.html">Trang chủ</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <a href="login.html" class="btn btn-primary">Đăng nhập</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
         <h3>Đăng ký</h3>
         <hr>
         <form>
             <div class="mb-3">
                 <label for="username" class="form-label">Tên đăng nhập</label>
-                <input type="text" class="form-control" id="username" placeholder="@example" name="username"
-                    required>
+                <input type="text" class="form-control" id="username" placeholder="@example" name="username" required>
             </div>
             <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" placeholder="example@example.com"
-                    name="email" required>
+                <input type="email" class="form-control" id="email" placeholder="example@example.com" name="email"
+                    required>
             </div>
             <div class="mb-3">
                 <label for="password1" class="form-label">Mật khẩu</label>
-                <input type="password" class="form-control" id="password1" name="password1"
-                    placeholder="@PassWoRD" required>
+                <input type="password" class="form-control" id="password1" name="password1" placeholder="@PassWoRD"
+                    required>
             </div>
             <div class="mb-3">
                 <label for="password2" class="form-label">Nhập lại mật khẩu</label>
-                <input type="password" class="form-control" id="password2" name="password2"
-                    placeholder="@PassWoRD" required>
+                <input type="password" class="form-control" id="password2" name="password2" placeholder="@PassWoRD"
+                    required>
             </div>
-            
+
             <button type="submit" class="btn btn-primary" onclick="validateForm()">Đăng ký</button>
             <button type="submit" class="btn btn-primary" onclick="reset()">Reset</button>
         </form>
