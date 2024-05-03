@@ -1,4 +1,4 @@
-package org.vinhveer.message.RestController;
+package org.vinhveer.message.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
