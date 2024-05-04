@@ -1,13 +1,13 @@
 //UI LOGIC
 const chatArea = document.querySelector(".messages");
 if (chatArea) {
-  chatArea.scrollTop = chatArea.scrollHeight;
   document.querySelector(".btn-search").addEventListener("click", function () {
     document.querySelector(".input-search").focus();
   });
+
   document.getElementById("toggleInfo").addEventListener("click", function () {
     const info = document.querySelector(".info");
-    if (window.innerWidth > 768) {
+    if (window.innerWidth > 768 && document.querySelector(".userChat.active")) {
       info.classList.toggle("active");
     } else {
       info.style.display = info.style.display === "block" ? "none" : "block";
@@ -192,16 +192,18 @@ async function fetchData() {
   let friendName = document.querySelector(".friend-name");
   let friendAvatar = document.querySelector(".friend-avt img");
   friendName.textContent = firstFriend[0].fullName;
-  friendAvatar.src = firstFriend[0].avatar;
+  friendAvatar.src = firstFriend[0].avatar
+    ? firstFriend[0].avatar
+    : "./img/noavatar.png";
 
   displayChatInfo(firstFriend[0].id);
-  displayChatMessages(firstFriend[0].id, firstFriend[0].avatar)
+  displayChatMessages(firstFriend[0].id, firstFriend[0].avatar);
 
   // Thêm từng bạn bè vào danh sách
   friendDetails.forEach((friend, index) => {
     let friendElement = document.createElement("div");
     friendElement.classList.add("userChat");
-    if (index === 0) {
+    if (friendDetails.length > 0 && index === 0) {
       friendElement.classList.add("active");
     }
 
@@ -213,10 +215,12 @@ async function fetchData() {
       this.classList.add("active");
 
       displayChatInfo(friend[0].id);
-      displayChatMessages(friend[0].id, friend[0].avatar)
+      displayChatMessages(friend[0].id, friend[0].avatar);
 
       friendName.textContent = friend[0].fullName;
-      friendAvatar.src = friend[0].avatar;
+      friendAvatar.src = friend[0].avatar
+        ? friend[0].avatar
+        : "./img/noavatar.png";
     });
     if (friend[0]) {
       friendElement.dataset.friendId = friend[0].id;
@@ -242,10 +246,10 @@ async function fetchData() {
       textElement.classList.add("userChatInfo-text");
 
       let p1 = document.createElement("p");
-      p1.textContent = "Trí đẹp trai"; // Thay đổi ở đây
+      p1.textContent = "Thơ hay quá, cảm ơn bạn, thật là tuyệt"; // Thay đổi ở đây
 
       let p2 = document.createElement("p");
-      p2.textContent = "10:23"; // Thay đổi ở đây
+      p2.textContent = "00:46"; // Thay đổi ở đây
 
       textElement.appendChild(p1);
       textElement.appendChild(p2);
@@ -259,16 +263,21 @@ async function fetchData() {
       chatsContainer.appendChild(friendElement);
     }
   });
+
+  if (friendDetails.length === 0) {
+    document.querySelector(".info").classList.remove("active");
+  } else {
+    document.querySelector(".info").classList.add("active");
+  }
 }
 
 fetchData().catch((error) => console.error(error));
-
 
 // SEND MESSAGE
 var messageInput = document.getElementById("i");
 var sendButton = document.querySelector(".input button");
 
-sendButton.addEventListener("click", function (event) {
+sendButton.addEventListener("click", async function (event) {
   event.preventDefault(); // Ngăn form gửi đi
 
   // Kiểm tra xem một cuộc trò chuyện có được chọn không
@@ -278,9 +287,6 @@ sendButton.addEventListener("click", function (event) {
     return;
   }
 
-  // Lấy ID cuộc trò chuyện từ phần tử .userChat.active
-  var conservationId = activeUserChat.dataset.conservationId;
-
   // Lấy nội dung tin nhắn từ input
   var message = messageInput.value;
   if (message === "") {
@@ -288,9 +294,15 @@ sendButton.addEventListener("click", function (event) {
     return;
   }
 
+  // Lấy id của người nhận tin nhắn
+  var friendId = activeUserChat.dataset.friendId;
+
+  const conservation = await getConservation(friendId);
+
+  // console.log(conservation);
   // Tạo đối tượng tin nhắn mới
   var newMessage = {
-    conservationId: "6635d2470ef989049c4d3459",
+    conservationId: conservation.id,
     userId: currentUserId,
     type: "TEXT",
     content: message,
@@ -300,13 +312,15 @@ sendButton.addEventListener("click", function (event) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "authorization": "Bearer " + localStorage.getItem("token"),
+      authorization: "Bearer " + localStorage.getItem("token"),
     },
     body: JSON.stringify(newMessage),
   })
     .then((response) => {
       if (response.ok) {
         messageInput.value = "";
+        //tà đạo
+        // displayChatMessages(friendId, activeUserChat.dataset.friendAvatar);
       } else {
         alert("Không thể gửi tin nhắn. Vui lòng thử lại sau.");
       }
@@ -317,58 +331,72 @@ sendButton.addEventListener("click", function (event) {
     });
 });
 
-// GET CONSERVATION ID
-async function displayChatMessages(friendId, friendAvatar) {
-  // console.log(friendId);
+//Get conversation
+async function getConservation(friendId) {
   const conservations = await fetchApi(
     `http://localhost:8080/conversation/getByUserId?userId=${currentUserId}`
   );
 
-  const conservation = conservations.filter((c) => c.participantId.includes(friendId));
-  // console.log(conservation[0].id);
-  const messages = await fetchApi(
-    `http://localhost:8080/message/get?conversationId=${conservation[0].id}`
+  const conservation = conservations.filter((c) =>
+    c.participantId.includes(friendId)
   );
 
-  const messagesContainer = document.querySelector('.messages');
+  return conservation[0];
+}
 
-  messagesContainer.innerHTML = '';
+//DISPLAY MESSAGE
+async function displayChatMessages(friendId, friendAvatar) {
+  // console.log(friendId);
+  const conservation = await getConservation(friendId);
+  // console.log(conservation.id, friendId);
+  const messages = await fetchApi(
+    `http://localhost:8080/message/get?conversationId=${conservation.id}`
+  );
 
-  messages.forEach(message => {
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message');
+  const messagesContainer = document.querySelector(".messages");
 
-    const messageInfoDiv = document.createElement('div');
-    messageInfoDiv.classList.add('messageInfo');
+  messagesContainer.innerHTML = "";
 
-    const avatarImg = document.createElement('img');
-    avatarImg.src = friendAvatar ? friendAvatar : './img/noavatar.png';
-    avatarImg.alt = 'User Photo';
+  messages.forEach((message) => {
+    const messageDiv = document.createElement("div");
+    messageDiv.classList.add("message");
+
+    const messageInfoDiv = document.createElement("div");
+    messageInfoDiv.classList.add("messageInfo");
+
+    const avatarImg = document.createElement("img");
+    avatarImg.src = friendAvatar ? friendAvatar : "./img/noavatar.png";
+    avatarImg.alt = "User Photo";
 
     messageInfoDiv.appendChild(avatarImg);
     messageDiv.appendChild(messageInfoDiv);
 
-    const messageContentDiv = document.createElement('div');
-    messageContentDiv.classList.add('messageContent');
+    const messageContentDiv = document.createElement("div");
+    messageContentDiv.classList.add("messageContent");
 
-    const contentParagraph = document.createElement('p');
+    const contentParagraph = document.createElement("p");
     contentParagraph.textContent = message.content;
 
-    const timestampSpan = document.createElement('span');
+    const timestampSpan = document.createElement("span");
     const messageDate = new Date(message.timestamp);
-    timestampSpan.textContent = messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    timestampSpan.textContent = messageDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
     messageContentDiv.appendChild(contentParagraph);
     messageContentDiv.appendChild(timestampSpan);
 
     messageDiv.appendChild(messageContentDiv);
     if (message.userId === currentUserId) {
-      messageDiv.classList.add('owner');
+      messageDiv.classList.add("owner");
     }
 
     // Thêm tin nhắn vào phần tử gốc
-    messagesContainer.appendChild(messageDiv);
+    messagesContainer.prepend(messageDiv);
   });
+
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
 //SEARCH USER
@@ -381,7 +409,7 @@ searchInput.addEventListener("input", async function () {
 
   if (searchValue === "") {
     findUserContainer.innerHTML = "";
-    findUserContainer.style.display = "none"; // Ẩn findUserContainer
+    findUserContainer.style.display = "none";
     userNotFound.style.display = "none";
     return;
   }
@@ -395,9 +423,6 @@ searchInput.addEventListener("input", async function () {
     const friends = await fetchApi(
       `http://localhost:8080/friendship/friends/${currentUserId}`
     );
-    const friendRequests = await fetchApi(
-      `http://localhost:8080/friendship/requests/${currentUserId}`
-    );
 
     const friendIds = friends.map((friendship) => {
       return friendship.senderId === currentUserId
@@ -405,16 +430,7 @@ searchInput.addEventListener("input", async function () {
         : friendship.senderId;
     });
 
-    const sentRequestIds = friendRequests.map((request) =>
-      request.receiverId === currentUserId
-        ? request.senderId
-        : request.receiverId
-    );
-
-    const nonFriends = users.filter(
-      (user) =>
-        !friendIds.includes(user.id) && !sentRequestIds.includes(user.id)
-    );
+    const nonFriends = users.filter((user) => !friendIds.includes(user.id));
 
     if (searchInput.value !== searchValueAtRequestTime) {
       return;
@@ -428,7 +444,7 @@ searchInput.addEventListener("input", async function () {
     } else {
       userNotFound.style.display = "none";
 
-      nonFriends.forEach((user) => {
+      nonFriends.forEach(async (user) => {
         if (user.id !== currentUserId) {
           var userFriendElement = document.createElement("div");
           userFriendElement.classList.add("user-friend");
@@ -438,7 +454,7 @@ searchInput.addEventListener("input", async function () {
           userChatImgElement.classList.add("userChat-img");
 
           var imgElement = document.createElement("img");
-          imgElement.src = user.avatar;
+          imgElement.src = user.avatar ? user.avatar : "img/noavatar.png";
           imgElement.alt = "User Photo";
 
           var userChatInfoElement = document.createElement("div");
@@ -452,8 +468,20 @@ searchInput.addEventListener("input", async function () {
           btnsFriendElement.classList.add("btns-friend");
 
           var addButton = document.createElement("button");
-          addButton.textContent = "Thêm bạn";
-          addButton.classList.add("btn-friend-accept");
+
+          const sendRequest = await fetchApi(
+            `http://localhost:8080/friendship/requests/${user.id}`
+          );
+
+          // console.log(sendRequest[0]);
+          if (sendRequest[0] && sendRequest[0].status === "PENDING") {
+            addButton.textContent = "Đã gửi";
+            addButton.disabled = true;
+            addButton.classList.add("btn-friend-decline");
+          } else {
+            addButton.textContent = "Thêm bạn";
+            addButton.classList.add("btn-friend-accept");
+          }
 
           addButton.addEventListener("click", function () {
             var receiverId =
@@ -464,8 +492,17 @@ searchInput.addEventListener("input", async function () {
             )
               .then((message) => {
                 if (message === "Friend request sent successfully.") {
-                  userFriendElement.remove();
+                  addButton.textContent = "Đã gửi";
+                  addButton.disabled = true;
+                  addButton.classList.add("btn-friend-decline");
                   console.log("Friend request sent successfully");
+                } else if (
+                  message ==
+                  "A friendship or request already exists between these users."
+                ) {
+                  addButton.textContent = "Đã gửi";
+                  addButton.disabled = true;
+                  addButton.classList.add("btn-friend-decline");
                 } else {
                   alert("Không thể gửi yêu cầu kết bạn. Vui lòng thử lại sau.");
                 }
@@ -551,14 +588,15 @@ function fetchAndDisplayContacts() {
                   ) {
                     var newConversation = {
                       conservationName: "Chat",
-                      participantId: [senderId, currentUserId]
+                      participantId: [senderId, currentUserId],
                     };
-                    console.log(JSON.stringify(newConversation))
+                    console.log(JSON.stringify(newConversation));
                     fetch("http://localhost:8080/conversation/create", {
                       method: "POST",
                       headers: {
                         "Content-Type": "application/json",
-                        "authorization": "Bearer " + localStorage.getItem("token"),
+                        authorization:
+                          "Bearer " + localStorage.getItem("token"),
                       },
                       body: JSON.stringify(newConversation),
                     })
@@ -599,14 +637,14 @@ function fetchAndDisplayContacts() {
 
             contacts.appendChild(userFriendElement);
           })
-          .catch((error) => console.error("Error:", error))
-          .finally(() => {
-            contactsBtn.disabled = false;
-          });
+          .catch((error) => console.error("Error:", error));
       });
+      return Promise.all(fetchPromises);
     })
     .catch((error) => {
       console.error("Error:", error);
+    })
+    .finally(() => {
       contactsBtn.disabled = false;
     });
 }

@@ -637,6 +637,8 @@ html {
   padding: 10px;
   height: calc(100% - 130px);
   overflow-y: scroll;
+  display: flex;
+  flex-direction: column-reverse;
 }
 
 .home .container .chat .messages .message {
@@ -691,6 +693,9 @@ html {
   display: none;
 }
 
+.home .container .chat .messages .message.owner .messageContent {
+  align-items: flex-end;
+}
 .home .container .chat .messages .message.owner .messageContent p {
   background-color: #0075e4;
   color: white;
