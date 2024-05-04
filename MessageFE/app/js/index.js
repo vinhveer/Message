@@ -195,13 +195,12 @@ async function fetchData() {
   friendAvatar.src = firstFriend[0].avatar;
 
   displayChatInfo(firstFriend[0].id);
-  // displayChatMessages(friends[0].id);
+  displayChatMessages(firstFriend[0].id, firstFriend[0].avatar)
 
   // Thêm từng bạn bè vào danh sách
   friendDetails.forEach((friend, index) => {
     let friendElement = document.createElement("div");
     friendElement.classList.add("userChat");
-
     if (index === 0) {
       friendElement.classList.add("active");
     }
@@ -214,52 +213,163 @@ async function fetchData() {
       this.classList.add("active");
 
       displayChatInfo(friend[0].id);
-      // displayChatMessages(friends[0].id);
+      displayChatMessages(friend[0].id, friend[0].avatar)
 
       friendName.textContent = friend[0].fullName;
       friendAvatar.src = friend[0].avatar;
     });
+    if (friend[0]) {
+      friendElement.dataset.friendId = friend[0].id;
 
-    let imgElement = document.createElement("div");
-    imgElement.classList.add("userChat-img");
-    imgElement.classList.add("online");
+      let imgElement = document.createElement("div");
+      imgElement.classList.add("userChat-img");
+      imgElement.classList.add("online");
 
-    let imgTag = document.createElement("img");
-    imgTag.src = friend[0].avatar ? friend[0].avatar : "./img/noavatar.png";
-    imgTag.alt = "User Photo";
+      let imgTag = document.createElement("img");
+      imgTag.src = friend[0].avatar ? friend[0].avatar : "./img/noavatar.png";
+      imgTag.alt = "User Photo";
 
-    imgElement.appendChild(imgTag);
+      imgElement.appendChild(imgTag);
 
-    let infoElement = document.createElement("div");
-    infoElement.classList.add("userChatInfo");
+      let infoElement = document.createElement("div");
+      infoElement.classList.add("userChatInfo");
 
-    let nameElement = document.createElement("span");
-    nameElement.classList.add("userChatInfo-name");
-    nameElement.textContent = friend[0].fullName;
+      let nameElement = document.createElement("span");
+      nameElement.classList.add("userChatInfo-name");
+      nameElement.textContent = friend[0].fullName;
 
-    let textElement = document.createElement("div");
-    textElement.classList.add("userChatInfo-text");
+      let textElement = document.createElement("div");
+      textElement.classList.add("userChatInfo-text");
 
-    let p1 = document.createElement("p");
-    p1.textContent = "Trí đẹp trai"; // Thay đổi ở đây
+      let p1 = document.createElement("p");
+      p1.textContent = "Trí đẹp trai"; // Thay đổi ở đây
 
-    let p2 = document.createElement("p");
-    p2.textContent = "10:23"; // Thay đổi ở đây
+      let p2 = document.createElement("p");
+      p2.textContent = "10:23"; // Thay đổi ở đây
 
-    textElement.appendChild(p1);
-    textElement.appendChild(p2);
+      textElement.appendChild(p1);
+      textElement.appendChild(p2);
 
-    infoElement.appendChild(nameElement);
-    infoElement.appendChild(textElement);
+      infoElement.appendChild(nameElement);
+      infoElement.appendChild(textElement);
 
-    friendElement.appendChild(imgElement);
-    friendElement.appendChild(infoElement);
+      friendElement.appendChild(imgElement);
+      friendElement.appendChild(infoElement);
 
-    chatsContainer.appendChild(friendElement);
+      chatsContainer.appendChild(friendElement);
+    }
   });
 }
 
 fetchData().catch((error) => console.error(error));
+
+
+// SEND MESSAGE
+var messageInput = document.getElementById("i");
+var sendButton = document.querySelector(".input button");
+
+sendButton.addEventListener("click", function (event) {
+  event.preventDefault(); // Ngăn form gửi đi
+
+  // Kiểm tra xem một cuộc trò chuyện có được chọn không
+  var activeUserChat = document.querySelector(".userChat.active");
+  if (!activeUserChat) {
+    alert("Vui lòng chọn một cuộc trò chuyện để gửi tin nhắn.");
+    return;
+  }
+
+  // Lấy ID cuộc trò chuyện từ phần tử .userChat.active
+  var conservationId = activeUserChat.dataset.conservationId;
+
+  // Lấy nội dung tin nhắn từ input
+  var message = messageInput.value;
+  if (message === "") {
+    alert("Vui lòng nhập nội dung tin nhắn.");
+    return;
+  }
+
+  // Tạo đối tượng tin nhắn mới
+  var newMessage = {
+    conservationId: "6635d2470ef989049c4d3459",
+    userId: currentUserId,
+    type: "TEXT",
+    content: message,
+  };
+
+  fetch("http://localhost:8080/message/send", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "authorization": "Bearer " + localStorage.getItem("token"),
+    },
+    body: JSON.stringify(newMessage),
+  })
+    .then((response) => {
+      if (response.ok) {
+        messageInput.value = "";
+      } else {
+        alert("Không thể gửi tin nhắn. Vui lòng thử lại sau.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("Không thể gửi tin nhắn.");
+    });
+});
+
+// GET CONSERVATION ID
+async function displayChatMessages(friendId, friendAvatar) {
+  // console.log(friendId);
+  const conservations = await fetchApi(
+    `http://localhost:8080/conversation/getByUserId?userId=${currentUserId}`
+  );
+
+  const conservation = conservations.filter((c) => c.participantId.includes(friendId));
+  // console.log(conservation[0].id);
+  const messages = await fetchApi(
+    `http://localhost:8080/message/get?conversationId=${conservation[0].id}`
+  );
+
+  const messagesContainer = document.querySelector('.messages');
+
+  messagesContainer.innerHTML = '';
+
+  messages.forEach(message => {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message');
+
+    const messageInfoDiv = document.createElement('div');
+    messageInfoDiv.classList.add('messageInfo');
+
+    const avatarImg = document.createElement('img');
+    avatarImg.src = friendAvatar ? friendAvatar : './img/noavatar.png';
+    avatarImg.alt = 'User Photo';
+
+    messageInfoDiv.appendChild(avatarImg);
+    messageDiv.appendChild(messageInfoDiv);
+
+    const messageContentDiv = document.createElement('div');
+    messageContentDiv.classList.add('messageContent');
+
+    const contentParagraph = document.createElement('p');
+    contentParagraph.textContent = message.content;
+
+    const timestampSpan = document.createElement('span');
+    const messageDate = new Date(message.timestamp);
+    timestampSpan.textContent = messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    messageContentDiv.appendChild(contentParagraph);
+    messageContentDiv.appendChild(timestampSpan);
+
+    messageDiv.appendChild(messageContentDiv);
+    if (message.userId === currentUserId) {
+      messageDiv.classList.add('owner');
+    }
+
+    // Thêm tin nhắn vào phần tử gốc
+    messagesContainer.appendChild(messageDiv);
+  });
+}
 
 //SEARCH USER
 var searchInput = document.getElementById("search");
@@ -354,7 +464,7 @@ searchInput.addEventListener("input", async function () {
             )
               .then((message) => {
                 if (message === "Friend request sent successfully.") {
-                  // fetchAndDisplayContacts();
+                  userFriendElement.remove();
                   console.log("Friend request sent successfully");
                 } else {
                   alert("Không thể gửi yêu cầu kết bạn. Vui lòng thử lại sau.");
@@ -439,7 +549,33 @@ function fetchAndDisplayContacts() {
                   if (
                     message === "friend request have been accepted successfully"
                   ) {
-                    fetchAndDisplayContacts();
+                    var newConversation = {
+                      conservationName: "Chat",
+                      participantId: [senderId, currentUserId]
+                    };
+                    console.log(JSON.stringify(newConversation))
+                    fetch("http://localhost:8080/conversation/create", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        "authorization": "Bearer " + localStorage.getItem("token"),
+                      },
+                      body: JSON.stringify(newConversation),
+                    })
+                      .then((response) => {
+                        if (response.ok) {
+                          userFriendElement.remove();
+                          console.log("Conversation created successfully");
+                        } else {
+                          alert(
+                            "Không thể tạo cuộc trò chuyện. Vui lòng thử lại sau."
+                          );
+                        }
+                      })
+                      .catch((error) => {
+                        console.error("Error:", error);
+                        alert("Không thể tạo cuộc trò chuyện.");
+                      });
                   } else {
                     alert(
                       "Không thể chấp nhận yêu cầu kết bạn. Vui lòng thử lại sau."

@@ -1,0 +1,1 @@
+document.getElementsByClassName('chat')[0].innerHTML("Hello, world!")
