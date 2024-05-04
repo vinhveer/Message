@@ -47,6 +47,11 @@ public class UserController {
         return userService.getUserById(userId);
     }
 
+    @GetMapping("/get_email")
+    public User getUserByEmail(@RequestParam String email) {
+        return userService.getUserByEmail(email).orElse(null);
+    }
+
     @GetMapping("/search")
     public List<User> findUserByName(@RequestParam String keyword) {
         return userService.findUserByKeyword(keyword);

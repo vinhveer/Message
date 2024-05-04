@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface FriendshipRepository extends MongoRepository<Friendship, String> {
     // Update method names and parameters to use new field names
-    Friendship findBySenderId(String senderId);
+    List<Friendship> findBySenderId(String senderId);
     Friendship findBySenderIdAndReceiverId(String senderId, String receiverId);
 
     List<Friendship> findByReceiverIdAndStatus(String receiverId, Friendship.FriendshipStatus friendshipStatus);

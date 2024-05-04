@@ -134,6 +134,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<User> getUserByEmail(String email) {
+        return Optional.ofNullable(userRepository.findByEmail(email));
+    }
+
+    @Override
     public List<User> findUserByKeyword(String keyword) {
         String lowercaseKeyword = keyword.toLowerCase();
 

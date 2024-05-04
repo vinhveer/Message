@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.vinhveer.message.Entity.User;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public interface UserService {
@@ -14,5 +15,6 @@ public interface UserService {
     ResponseEntity<String> updateUser(User user);
     ResponseEntity<String> checkUser(String email, String password);
     List<User> getUserById(String userId);
+    Optional<User> getUserByEmail(String email);
     List<User> findUserByKeyword(String keyword);
 }
