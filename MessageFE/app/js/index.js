@@ -290,6 +290,9 @@ fetchData().catch((error) => console.error(error));
 var messageInput = document.getElementById("i");
 var sendButton = document.querySelector(".input button");
 
+// Khởi tạo kết nối WebSocket với token xác thực trong header
+var socket = new WebSocket('ws://localhost:8080/ws');
+
 sendButton.addEventListener("click", async function (event) {
   event.preventDefault(); // Ngăn form gửi đi
 
@@ -312,7 +315,6 @@ sendButton.addEventListener("click", async function (event) {
 
   const conservation = await getConservation(friendId);
 
-  // console.log(conservation);
   // Tạo đối tượng tin nhắn mới
   var newMessage = {
     conservationId: conservation.id,
@@ -321,28 +323,103 @@ sendButton.addEventListener("click", async function (event) {
     content: message,
   };
 
-  fetch("http://localhost:8080/message/send", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      authorization: "Bearer " + localStorage.getItem("token"),
-    },
-    body: JSON.stringify(newMessage),
-  })
-    .then((response) => {
-      if (response.ok) {
-        messageInput.value = "";
-        //tà đạo
-        // displayChatMessages(friendId, activeUserChat.dataset.friendAvatar);
-      } else {
-        alert("Không thể gửi tin nhắn. Vui lòng thử lại sau.");
-      }
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      alert("Không thể gửi tin nhắn.");
-    });
+  // Gửi tin nhắn qua WebSocket
+  socket.send(JSON.stringify(newMessage));
+  
+  // Hiển thị tin nhắn đã gửi
+  displaySentMessage(newMessage);
+  
+  messageInput.value = "";
 });
+
+// Thêm trình xử lý sự kiện cho sự kiện 'message' của WebSocket
+socket.onmessage = async function(event) {
+  // Phân tích dữ liệu tin nhắn từ server
+  var message = JSON.parse(event.data);
+
+  // Hiển thị tin nhắn đã nhận
+  displayReceiveMessages(message.userId, message.content);
+};
+
+
+function displayReceiveMessages(userId, content) {
+  const messagesContainer = document.querySelector(".messages");
+
+  const messageDiv = document.createElement("div");
+  messageDiv.classList.add("message");
+
+  const messageInfoDiv = document.createElement("div");
+  messageInfoDiv.classList.add("messageInfo");
+
+  const avatarImg = document.createElement("img");
+  avatarImg.src = "./img/noavatar.png"; // Thay thế bằng avatar của người gửi
+  avatarImg.alt = "User Photo";
+
+  messageInfoDiv.appendChild(avatarImg);
+  messageDiv.appendChild(messageInfoDiv);
+
+  const messageContentDiv = document.createElement("div");
+  messageContentDiv.classList.add("messageContent");
+
+  const contentParagraph = document.createElement("p");
+  contentParagraph.textContent = content;
+
+  const timestampSpan = document.createElement("span");
+  const messageDate = new Date();
+  timestampSpan.textContent = messageDate.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  messageContentDiv.appendChild(contentParagraph);
+  messageContentDiv.appendChild(timestampSpan);
+
+  messageDiv.appendChild(messageContentDiv);
+
+  // Thêm tin nhắn vào phần tử gốc
+  messagesContainer.prepend(messageDiv);
+}
+
+
+function displaySentMessage(message) {
+  const messagesContainer = document.querySelector(".messages");
+
+  const messageDiv = document.createElement("div");
+  messageDiv.classList.add("message", "owner");
+
+  const messageInfoDiv = document.createElement("div");
+  messageInfoDiv.classList.add("messageInfo");
+
+  const avatarImg = document.createElement("img");
+  avatarImg.src = "./img/noavatar.png"; // Thay thế bằng avatar của người gửi
+  avatarImg.alt = "User Photo";
+
+  messageInfoDiv.appendChild(avatarImg);
+  messageDiv.appendChild(messageInfoDiv);
+
+  const messageContentDiv = document.createElement("div");
+  messageContentDiv.classList.add("messageContent");
+
+  const contentParagraph = document.createElement("p");
+  contentParagraph.textContent = message.content;
+
+  const timestampSpan = document.createElement("span");
+  const messageDate = new Date();
+  timestampSpan.textContent = messageDate.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  messageContentDiv.appendChild(contentParagraph);
+  messageContentDiv.appendChild(timestampSpan);
+
+  messageDiv.appendChild(messageContentDiv);
+
+  // Thêm tin nhắn vào phần tử gốc
+  messagesContainer.prepend(messageDiv);
+}
+
+
 
 //Get conversation
 async function getConservation(friendId) {
