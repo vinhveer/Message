@@ -134,6 +134,7 @@ let token = localStorage.getItem("token");
 let email = parseJwt(token).sub;
 
 let currentUserId;
+let currentUserName;
 
 async function displayChatInfo(friendId) {
   const friend = await fetchApi(
@@ -152,7 +153,6 @@ async function displayChatInfo(friendId) {
     ? friend[0].avatar
     : "./img/noavatar.png";
 }
-
 // Fetch thông tin người dùng từ server
 async function fetchData() {
   const user = await fetchApi(
@@ -165,7 +165,7 @@ async function fetchData() {
     : "img/noavatar.png";
 
   currentUserId = user.id;
-
+  currentUserName = user.fullName;
   const friendList = await fetchApi(
     `http://localhost:8080/friendship/friends/${currentUserId}`
   );
@@ -200,81 +200,95 @@ async function fetchData() {
   displayChatMessages(firstFriend[0].id, firstFriend[0].avatar);
 
   // Thêm từng bạn bè vào danh sách
-  friendDetails.forEach(async (friend, index) => {
-    let friendElement = document.createElement("div");
-    friendElement.classList.add("userChat");
-    if (friendDetails.length > 0 && index === 0) {
-      friendElement.classList.add("active");
-    }
+  let userChatElements = [];
+  await Promise.all(
+    friendDetails.map(async (friend, index) => {
+      let friendElement = document.createElement("div");
+      friendElement.classList.add("userChat");
+      if (friendDetails.length > 0 && index === 0) {
+        friendElement.classList.add("active");
+      }
 
-    friendElement.addEventListener("click", function () {
-      document.querySelectorAll(".userChat.active").forEach((activeElement) => {
-        activeElement.classList.remove("active");
+      friendElement.addEventListener("click", function () {
+        document
+          .querySelectorAll(".userChat.active")
+          .forEach((activeElement) => {
+            activeElement.classList.remove("active");
+          });
+
+        this.classList.add("active");
+
+        displayChatInfo(friend[0].id);
+        displayChatMessages(friend[0].id, friend[0].avatar);
+
+        friendName.textContent = friend[0].fullName;
+        friendAvatar.src = friend[0].avatar
+          ? friend[0].avatar
+          : "./img/noavatar.png";
       });
 
-      this.classList.add("active");
+      if (friend[0]) {
+        friendElement.dataset.friendId = friend[0].id;
 
-      displayChatInfo(friend[0].id);
-      displayChatMessages(friend[0].id, friend[0].avatar);
+        let imgElement = document.createElement("div");
+        imgElement.classList.add("userChat-img", "online");
 
-      friendName.textContent = friend[0].fullName;
-      friendAvatar.src = friend[0].avatar
-        ? friend[0].avatar
-        : "./img/noavatar.png";
-    });
-    if (friend[0]) {
-      friendElement.dataset.friendId = friend[0].id;
+        let imgTag = document.createElement("img");
+        imgTag.src = friend[0].avatar ? friend[0].avatar : "./img/noavatar.png";
+        imgTag.alt = "User Photo";
 
-      let imgElement = document.createElement("div");
-      imgElement.classList.add("userChat-img");
-      imgElement.classList.add("online");
+        imgElement.appendChild(imgTag);
 
-      let imgTag = document.createElement("img");
-      imgTag.src = friend[0].avatar ? friend[0].avatar : "./img/noavatar.png";
-      imgTag.alt = "User Photo";
+        let infoElement = document.createElement("div");
+        infoElement.classList.add("userChatInfo");
 
-      imgElement.appendChild(imgTag);
+        let nameElement = document.createElement("span");
+        nameElement.classList.add("userChatInfo-name");
+        nameElement.textContent = friend[0].fullName;
 
-      let infoElement = document.createElement("div");
-      infoElement.classList.add("userChatInfo");
+        const conservation = await getConservation(friend[0].id);
 
-      let nameElement = document.createElement("span");
-      nameElement.classList.add("userChatInfo-name");
-      nameElement.textContent = friend[0].fullName;
+        const messages = await fetchApi(
+          `http://localhost:8080/message/get?conversationId=${conservation.id}`
+        );
 
-      const conservation = await getConservation(friend[0].id);
+        let lastMessage = messages[messages.length - 1];
 
-      const messages = await fetchApi(
-        `http://localhost:8080/message/get?conversationId=${conservation.id}`
-      );
+        let textElement = document.createElement("div");
+        textElement.classList.add("userChatInfo-text");
 
-      let lastMessage = messages[messages.length - 1];
+        let p1 = document.createElement("p");
+        p1.textContent = lastMessage ? lastMessage.content : "Chưa có tin nhắn";
 
-      let textElement = document.createElement("div");
-      textElement.classList.add("userChatInfo-text");
+        let messageDate;
+        if (lastMessage) {
+          messageDate = new Date(lastMessage.timestamp);
+        }
 
-      let p1 = document.createElement("p");
-      p1.textContent = lastMessage ? lastMessage.content : "Chưa có tin nhắn";
+        let p2 = document.createElement("p");
+        p2.textContent = messageDate
+          ? messageDate.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "";
 
-      let messageDate = new Date(lastMessage.timestamp);
+        textElement.appendChild(p1);
+        textElement.appendChild(p2);
 
-      let p2 = document.createElement("p");
-      p2.textContent = messageDate.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+        infoElement.appendChild(nameElement);
+        infoElement.appendChild(textElement);
 
-      textElement.appendChild(p1);
-      textElement.appendChild(p2);
+        friendElement.appendChild(imgElement);
+        friendElement.appendChild(infoElement);
 
-      infoElement.appendChild(nameElement);
-      infoElement.appendChild(textElement);
+        userChatElements[index] = friendElement;
+      }
+    })
+  );
 
-      friendElement.appendChild(imgElement);
-      friendElement.appendChild(infoElement);
-
-      chatsContainer.appendChild(friendElement);
-    }
+  userChatElements.forEach((friendElement) => {
+    chatsContainer.appendChild(friendElement);
   });
 
   if (friendDetails.length === 0) {
@@ -282,10 +296,11 @@ async function fetchData() {
   } else {
     document.querySelector(".info").classList.add("active");
   }
+
+  document.querySelector("#call").addEventListener("click", initializeCall);
 }
 
 fetchData().catch((error) => console.error(error));
-
 // SEND MESSAGE
 var messageInput = document.getElementById("i");
 var sendButton = document.querySelector(".input button");
@@ -771,3 +786,71 @@ infoFriendBtn.addEventListener("click", function () {
 document.querySelector("#close-info").addEventListener("click", function () {
   document.querySelector(".info-acc").style.display = "none";
 });
+
+function getUrlParams(url = window.location.href) {
+  let urlStr = url.split("?")[1];
+  return new URLSearchParams(urlStr);
+}
+
+async function initializeCall() {
+  const activeFriendElement = document.querySelector(".userChat.active");
+  const activeFriendId = activeFriendElement
+    ? activeFriendElement.dataset.friendId
+    : null;
+
+  if (activeFriendId) {
+    const newActiveFriendElement = document.querySelector(
+      `.userChat[data-friend-id="${activeFriendId}"]`
+    );
+    if (newActiveFriendElement) {
+      newActiveFriendElement.classList.add("active");
+    }
+  }
+
+  // const friendId = document.querySelector(".userChat.active").dataset.friendId;
+  const conversationId = await getConservation(activeFriendId);
+
+  const roomID = getUrlParams().get("roomID") || conversationId.id;
+  const userID = currentUserId;
+  const userName = currentUserName;
+  const appID = 1224677628;
+  const serverSecret = "b85b02e1a5e312772f79f9df07757dff";
+  console.log(roomID, userID, userName, appID, serverSecret);
+  const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
+    appID,
+    serverSecret,
+    roomID,
+    userID,
+    userName
+  );
+
+  const root = document.querySelector("#root");
+  root.style.display = "block";
+
+  const zp = ZegoUIKitPrebuilt.create(kitToken);
+
+  zp.joinRoom({
+    container: document.querySelector("#root"),
+    sharedLinks: [
+      {
+        url:
+          window.location.protocol +
+          "//" +
+          window.location.host +
+          window.location.pathname +
+          "?roomID=" +
+          roomID,
+      },
+    ],
+    // showPreJoinView: false,
+    onLeaveRoom: () => {
+      root.style.display = "none";
+    },
+    onReturnToHomeScreenClicked: () => {
+      root.style.display = "none";
+    },
+    scenario: {
+      mode: ZegoUIKitPrebuilt.OneONoneCall,
+    },
+  });
+}
