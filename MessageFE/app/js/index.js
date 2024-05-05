@@ -200,7 +200,7 @@ async function fetchData() {
   displayChatMessages(firstFriend[0].id, firstFriend[0].avatar);
 
   // Thêm từng bạn bè vào danh sách
-  friendDetails.forEach((friend, index) => {
+  friendDetails.forEach(async (friend, index) => {
     let friendElement = document.createElement("div");
     friendElement.classList.add("userChat");
     if (friendDetails.length > 0 && index === 0) {
@@ -242,14 +242,27 @@ async function fetchData() {
       nameElement.classList.add("userChatInfo-name");
       nameElement.textContent = friend[0].fullName;
 
+      const conservation = await getConservation(friend[0].id);
+
+      const messages = await fetchApi(
+        `http://localhost:8080/message/get?conversationId=${conservation.id}`
+      );
+
+      let lastMessage = messages[messages.length - 1];
+
       let textElement = document.createElement("div");
       textElement.classList.add("userChatInfo-text");
 
       let p1 = document.createElement("p");
-      p1.textContent = "Thơ hay quá, cảm ơn bạn, thật là tuyệt"; // Thay đổi ở đây
+      p1.textContent = lastMessage ? lastMessage.content : "Chưa có tin nhắn";
+
+      let messageDate = new Date(lastMessage.timestamp);
 
       let p2 = document.createElement("p");
-      p2.textContent = "00:46"; // Thay đổi ở đây
+      p2.textContent = messageDate.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
 
       textElement.appendChild(p1);
       textElement.appendChild(p2);
@@ -648,3 +661,36 @@ function fetchAndDisplayContacts() {
       contactsBtn.disabled = false;
     });
 }
+
+//display info user
+async function displayInfo(userId) {
+  document.querySelector(".info-acc").style.display = "block";
+  const user = await fetchApi(
+    `http://localhost:8080/user/get_id?userId=${userId}`
+  );
+
+  console.log(user);
+  document.querySelector(".info-avt-wrap span").textContent = user[0].fullName;
+  document.querySelector(".avt-user img").src = user[0].avatar
+    ? user[0].avatar
+    : "img/noavatar.png";
+  document.getElementById("dob").textContent = user[0].dateOfBirth;
+  document.getElementById("gender").textContent = user[0].gender ? "Nam" : "Nữ";
+  document.getElementById("email").textContent = user[0].email;
+}
+
+const infoUserBtn = document.querySelector("#info-user");
+infoUserBtn.addEventListener("click", function () {
+  displayInfo(currentUserId);
+});
+
+const infoFriendBtn = document.querySelector("#info-friend");
+infoFriendBtn.addEventListener("click", function () {
+  let friendId = document.querySelector(".userChat.active").dataset.friendId;
+  displayInfo(friendId);
+});
+
+//close modal info-user
+document.querySelector("#close-info").addEventListener("click", function () {
+  document.querySelector(".info-acc").style.display = "none";
+});
