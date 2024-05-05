@@ -1161,3 +1161,13 @@ html {
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+
+#root {
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 100;
+  position: absolute;
+  display: none;
+  background: #000;
+}

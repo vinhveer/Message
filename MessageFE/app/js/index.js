@@ -134,6 +134,7 @@ let token = localStorage.getItem("token");
 let email = parseJwt(token).sub;
 
 let currentUserId;
+let currentUserName;
 
 async function displayChatInfo(friendId) {
   const friend = await fetchApi(
@@ -165,6 +166,8 @@ async function fetchData() {
     : "img/noavatar.png";
 
   currentUserId = user.id;
+  currentUserName = user.fullName;
+  let conversationId;
 
   const friendList = await fetchApi(
     `http://localhost:8080/friendship/friends/${currentUserId}`
@@ -222,6 +225,7 @@ async function fetchData() {
         ? friend[0].avatar
         : "./img/noavatar.png";
     });
+
     if (friend[0]) {
       friendElement.dataset.friendId = friend[0].id;
 
@@ -256,13 +260,18 @@ async function fetchData() {
       let p1 = document.createElement("p");
       p1.textContent = lastMessage ? lastMessage.content : "Chưa có tin nhắn";
 
-      let messageDate = new Date(lastMessage.timestamp);
+      let messageDate;
+      if (lastMessage) {
+        messageDate = new Date(lastMessage.timestamp);
+      }
 
       let p2 = document.createElement("p");
-      p2.textContent = messageDate.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      p2.textContent = messageDate
+        ? messageDate.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "";
 
       textElement.appendChild(p1);
       textElement.appendChild(p2);
@@ -694,3 +703,58 @@ infoFriendBtn.addEventListener("click", function () {
 document.querySelector("#close-info").addEventListener("click", function () {
   document.querySelector(".info-acc").style.display = "none";
 });
+
+// function getUrlParams(url = window.location.href) {
+//   let urlStr = url.split("?")[1];
+//   return new URLSearchParams(urlStr);
+// }
+
+// async function initializeCall() {
+//   const data = await fetchData();
+//   const friendId = document.querySelector(".userChat.active").dataset.friendId;
+//   const conversationId = await getConservation(friendId);
+
+//   const roomID = getUrlParams().get("roomID") || conversationId;
+//   const userID = data.currentUserId;
+//   const userName = data.currentUserName;
+//   const appID = 1224677628;
+//   const serverSecret = "b85b02e1a5e312772f79f9df07757dff";
+//   console.log(roomID, userID, userName, appID, serverSecret);
+//   // const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
+//   //   appID,
+//   //   serverSecret,
+//   //   roomID,
+//   //   userID,
+//   //   userName
+//   // );
+
+//   // const root = document.querySelector("#root");
+//   // root.style.display = "block";
+
+//   // const zp = ZegoUIKitPrebuilt.create(kitToken);
+
+//   // // zp.joinRoom({
+//   // //   container: document.querySelector("#root"),
+//   // //   showPreJoinView: false,
+//   // // });
+
+//   // zp.joinRoom({
+//   //   container: document.querySelector("#root"),
+//   //   sharedLinks: [
+//   //     {
+//   //       url:
+//   //         window.location.protocol +
+//   //         "//" +
+//   //         window.location.host +
+//   //         window.location.pathname +
+//   //         "?roomID=" +
+//   //         roomID,
+//   //     },
+//   //   ],
+//   //   scenario: {
+//   //     mode: ZegoUIKitPrebuilt.OneONoneCall, //  To implement 1-on-1 calls, modify the parameter here to [ZegoUIKitPrebuilt.OneONoneCall].
+//   //   },
+//   // });
+// }
+
+// document.querySelector("#call").addEventListener("click", initializeCall);
