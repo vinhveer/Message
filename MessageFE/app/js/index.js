@@ -153,7 +153,6 @@ async function displayChatInfo(friendId) {
     ? friend[0].avatar
     : "./img/noavatar.png";
 }
-
 // Fetch thông tin người dùng từ server
 async function fetchData() {
   const user = await fetchApi(
@@ -167,8 +166,6 @@ async function fetchData() {
 
   currentUserId = user.id;
   currentUserName = user.fullName;
-  let conversationId;
-
   const friendList = await fetchApi(
     `http://localhost:8080/friendship/friends/${currentUserId}`
   );
@@ -203,87 +200,95 @@ async function fetchData() {
   displayChatMessages(firstFriend[0].id, firstFriend[0].avatar);
 
   // Thêm từng bạn bè vào danh sách
-  friendDetails.forEach(async (friend, index) => {
-    let friendElement = document.createElement("div");
-    friendElement.classList.add("userChat");
-    if (friendDetails.length > 0 && index === 0) {
-      friendElement.classList.add("active");
-    }
-
-    friendElement.addEventListener("click", function () {
-      document.querySelectorAll(".userChat.active").forEach((activeElement) => {
-        activeElement.classList.remove("active");
-      });
-
-      this.classList.add("active");
-
-      displayChatInfo(friend[0].id);
-      displayChatMessages(friend[0].id, friend[0].avatar);
-
-      friendName.textContent = friend[0].fullName;
-      friendAvatar.src = friend[0].avatar
-        ? friend[0].avatar
-        : "./img/noavatar.png";
-    });
-
-    if (friend[0]) {
-      friendElement.dataset.friendId = friend[0].id;
-
-      let imgElement = document.createElement("div");
-      imgElement.classList.add("userChat-img");
-      imgElement.classList.add("online");
-
-      let imgTag = document.createElement("img");
-      imgTag.src = friend[0].avatar ? friend[0].avatar : "./img/noavatar.png";
-      imgTag.alt = "User Photo";
-
-      imgElement.appendChild(imgTag);
-
-      let infoElement = document.createElement("div");
-      infoElement.classList.add("userChatInfo");
-
-      let nameElement = document.createElement("span");
-      nameElement.classList.add("userChatInfo-name");
-      nameElement.textContent = friend[0].fullName;
-
-      const conservation = await getConservation(friend[0].id);
-
-      const messages = await fetchApi(
-        `http://localhost:8080/message/get?conversationId=${conservation.id}`
-      );
-
-      let lastMessage = messages[messages.length - 1];
-
-      let textElement = document.createElement("div");
-      textElement.classList.add("userChatInfo-text");
-
-      let p1 = document.createElement("p");
-      p1.textContent = lastMessage ? lastMessage.content : "Chưa có tin nhắn";
-
-      let messageDate;
-      if (lastMessage) {
-        messageDate = new Date(lastMessage.timestamp);
+  let userChatElements = [];
+  await Promise.all(
+    friendDetails.map(async (friend, index) => {
+      let friendElement = document.createElement("div");
+      friendElement.classList.add("userChat");
+      if (friendDetails.length > 0 && index === 0) {
+        friendElement.classList.add("active");
       }
 
-      let p2 = document.createElement("p");
-      p2.textContent = messageDate
-        ? messageDate.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        : "";
+      friendElement.addEventListener("click", function () {
+        document
+          .querySelectorAll(".userChat.active")
+          .forEach((activeElement) => {
+            activeElement.classList.remove("active");
+          });
 
-      textElement.appendChild(p1);
-      textElement.appendChild(p2);
+        this.classList.add("active");
 
-      infoElement.appendChild(nameElement);
-      infoElement.appendChild(textElement);
+        displayChatInfo(friend[0].id);
+        displayChatMessages(friend[0].id, friend[0].avatar);
 
-      friendElement.appendChild(imgElement);
-      friendElement.appendChild(infoElement);
+        friendName.textContent = friend[0].fullName;
+        friendAvatar.src = friend[0].avatar
+          ? friend[0].avatar
+          : "./img/noavatar.png";
+      });
 
-      chatsContainer.appendChild(friendElement);
-    }
+      if (friend[0]) {
+        friendElement.dataset.friendId = friend[0].id;
+
+        let imgElement = document.createElement("div");
+        imgElement.classList.add("userChat-img", "online");
+
+        let imgTag = document.createElement("img");
+        imgTag.src = friend[0].avatar ? friend[0].avatar : "./img/noavatar.png";
+        imgTag.alt = "User Photo";
+
+        imgElement.appendChild(imgTag);
+
+        let infoElement = document.createElement("div");
+        infoElement.classList.add("userChatInfo");
+
+        let nameElement = document.createElement("span");
+        nameElement.classList.add("userChatInfo-name");
+        nameElement.textContent = friend[0].fullName;
+
+        const conservation = await getConservation(friend[0].id);
+
+        const messages = await fetchApi(
+          `http://localhost:8080/message/get?conversationId=${conservation.id}`
+        );
+
+        let lastMessage = messages[messages.length - 1];
+
+        let textElement = document.createElement("div");
+        textElement.classList.add("userChatInfo-text");
+
+        let p1 = document.createElement("p");
+        p1.textContent = lastMessage ? lastMessage.content : "Chưa có tin nhắn";
+
+        let messageDate;
+        if (lastMessage) {
+          messageDate = new Date(lastMessage.timestamp);
+        }
+
+        let p2 = document.createElement("p");
+        p2.textContent = messageDate
+          ? messageDate.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "";
+
+        textElement.appendChild(p1);
+        textElement.appendChild(p2);
+
+        infoElement.appendChild(nameElement);
+        infoElement.appendChild(textElement);
+
+        friendElement.appendChild(imgElement);
+        friendElement.appendChild(infoElement);
+
+        userChatElements[index] = friendElement;
+      }
+    })
+  );
+
+  userChatElements.forEach((friendElement) => {
+    chatsContainer.appendChild(friendElement);
   });
 
   if (friendDetails.length === 0) {
@@ -291,10 +296,11 @@ async function fetchData() {
   } else {
     document.querySelector(".info").classList.add("active");
   }
+
+  document.querySelector("#call").addEventListener("click", initializeCall);
 }
 
 fetchData().catch((error) => console.error(error));
-
 // SEND MESSAGE
 var messageInput = document.getElementById("i");
 var sendButton = document.querySelector(".input button");
@@ -330,27 +336,27 @@ sendButton.addEventListener("click", async function (event) {
     content: message,
   };
 
-  fetch("http://localhost:8080/message/send", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      authorization: "Bearer " + localStorage.getItem("token"),
-    },
-    body: JSON.stringify(newMessage),
-  })
-    .then((response) => {
-      if (response.ok) {
-        messageInput.value = "";
-        //tà đạo
-        // displayChatMessages(friendId, activeUserChat.dataset.friendAvatar);
-      } else {
-        alert("Không thể gửi tin nhắn. Vui lòng thử lại sau.");
-      }
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      alert("Không thể gửi tin nhắn.");
+  try {
+    const response = await fetch("http://localhost:8080/message/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: "Bearer " + localStorage.getItem("token"),
+      },
+      body: JSON.stringify(newMessage),
     });
+
+    if (response.ok) {
+      messageInput.value = "";
+      //tà đạo
+      // displayChatMessages(friendId, activeUserChat.dataset.friendAvatar);
+    } else {
+      alert("Không thể gửi tin nhắn. Vui lòng thử lại sau.");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Không thể gửi tin nhắn.");
+  }
 });
 
 //Get conversation
@@ -704,57 +710,70 @@ document.querySelector("#close-info").addEventListener("click", function () {
   document.querySelector(".info-acc").style.display = "none";
 });
 
-// function getUrlParams(url = window.location.href) {
-//   let urlStr = url.split("?")[1];
-//   return new URLSearchParams(urlStr);
-// }
+function getUrlParams(url = window.location.href) {
+  let urlStr = url.split("?")[1];
+  return new URLSearchParams(urlStr);
+}
 
-// async function initializeCall() {
-//   const data = await fetchData();
-//   const friendId = document.querySelector(".userChat.active").dataset.friendId;
-//   const conversationId = await getConservation(friendId);
+async function initializeCall() {
+  const activeFriendElement = document.querySelector(".userChat.active");
+  const activeFriendId = activeFriendElement
+    ? activeFriendElement.dataset.friendId
+    : null;
 
-//   const roomID = getUrlParams().get("roomID") || conversationId;
-//   const userID = data.currentUserId;
-//   const userName = data.currentUserName;
-//   const appID = 1224677628;
-//   const serverSecret = "b85b02e1a5e312772f79f9df07757dff";
-//   console.log(roomID, userID, userName, appID, serverSecret);
-//   // const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
-//   //   appID,
-//   //   serverSecret,
-//   //   roomID,
-//   //   userID,
-//   //   userName
-//   // );
+  if (activeFriendId) {
+    const newActiveFriendElement = document.querySelector(
+      `.userChat[data-friend-id="${activeFriendId}"]`
+    );
+    if (newActiveFriendElement) {
+      newActiveFriendElement.classList.add("active");
+    }
+  }
 
-//   // const root = document.querySelector("#root");
-//   // root.style.display = "block";
+  // const friendId = document.querySelector(".userChat.active").dataset.friendId;
+  const conversationId = await getConservation(activeFriendId);
 
-//   // const zp = ZegoUIKitPrebuilt.create(kitToken);
+  const roomID = getUrlParams().get("roomID") || conversationId.id;
+  const userID = currentUserId;
+  const userName = currentUserName;
+  const appID = 1224677628;
+  const serverSecret = "b85b02e1a5e312772f79f9df07757dff";
+  console.log(roomID, userID, userName, appID, serverSecret);
+  const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
+    appID,
+    serverSecret,
+    roomID,
+    userID,
+    userName
+  );
 
-//   // // zp.joinRoom({
-//   // //   container: document.querySelector("#root"),
-//   // //   showPreJoinView: false,
-//   // // });
+  const root = document.querySelector("#root");
+  root.style.display = "block";
 
-//   // zp.joinRoom({
-//   //   container: document.querySelector("#root"),
-//   //   sharedLinks: [
-//   //     {
-//   //       url:
-//   //         window.location.protocol +
-//   //         "//" +
-//   //         window.location.host +
-//   //         window.location.pathname +
-//   //         "?roomID=" +
-//   //         roomID,
-//   //     },
-//   //   ],
-//   //   scenario: {
-//   //     mode: ZegoUIKitPrebuilt.OneONoneCall, //  To implement 1-on-1 calls, modify the parameter here to [ZegoUIKitPrebuilt.OneONoneCall].
-//   //   },
-//   // });
-// }
+  const zp = ZegoUIKitPrebuilt.create(kitToken);
 
-// document.querySelector("#call").addEventListener("click", initializeCall);
+  zp.joinRoom({
+    container: document.querySelector("#root"),
+    sharedLinks: [
+      {
+        url:
+          window.location.protocol +
+          "//" +
+          window.location.host +
+          window.location.pathname +
+          "?roomID=" +
+          roomID,
+      },
+    ],
+    // showPreJoinView: false,
+    onLeaveRoom: () => {
+      root.style.display = "none";
+    },
+    onReturnToHomeScreenClicked: () => {
+      root.style.display = "none";
+    },
+    scenario: {
+      mode: ZegoUIKitPrebuilt.OneONoneCall,
+    },
+  });
+}
