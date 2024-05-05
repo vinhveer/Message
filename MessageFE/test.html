@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>WebSocket Test</title>
 </head>
+
 <body>
     <input id="userIdInput" type="text" placeholder="Enter your user id here..." />
     <input id="messageInput" type="text" placeholder="Type your message here..." />
@@ -10,35 +12,51 @@
     <div id="messages"></div>
 
     <script>
-        var token = localStorage.getItem('token'); // Lấy token từ local storage
-        var socket = new WebSocket("ws://localhost:8080/ws", ['Bearer', token]);
+        // Thay đổi địa chỉ URL tương ứng với server WebSocket của bạn
+        const socket = new WebSocket('ws://localhost:8080/ws');
 
-        socket.onopen = function(e) {
-            console.log("[open] Connection established");
-        };
-
-        socket.onmessage = function(event) {
-            var messagesDiv = document.getElementById('messages');
-            messagesDiv.innerHTML += '<p>' + event.data + '</p>';
-            console.log(`[message] Data received from server: ${event.data}`);
-        };
-
-        socket.onerror = function(error) {
-            console.log(`[error] ${error.message}`);
+        socket.onopen = function (event) {
+            alert('WebSocket connection established.');
         };
 
         document.getElementById('sendButton').addEventListener('click', function() {
-            var userIdInput = document.getElementById('userIdInput');
-            var messageInput = document.getElementById('messageInput');
-            var message = {
-                userId: userIdInput.value,
-                conservationId: "6635d2470ef989049c4d3459",
-                content: messageInput.value,
-                type: "text"
+            // Gửi tin nhắn đến server sau khi kết nối thành công
+            const message = {
+                userId: document.getElementById('userIdInput').value,
+                conservationId: '6635d2470ef989049c4d3459',
+                content: document.getElementById('messageInput').value,
+                type: 'TEXT'
             };
+
             socket.send(JSON.stringify(message));
-            messageInput.value = '';
+            displayMessage(message);
         });
+
+        socket.onmessage = function (event) {
+            console.log('Received message from server:', event.data);
+            try {
+                const message = JSON.parse(event.data);
+                displayMessage(message);
+            } catch (error) {
+                console.error('Error parsing message:', error);
+            }
+        };
+
+        socket.onerror = function (error) {
+            console.error('WebSocket error:', error);
+        };
+
+        socket.onclose = function (event) {
+            console.log('WebSocket connection closed:', event.code, event.reason);
+        };
+
+        function displayMessage(message) {
+            const messagesDiv = document.getElementById('messages');
+            const messageParagraph = document.createElement('p');
+            messageParagraph.textContent = `${message.userId}: ${message.content}`;
+            messagesDiv.appendChild(messageParagraph);
+        }
     </script>
 </body>
+
 </html>
