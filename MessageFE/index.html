@@ -1,60 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Đăng nhập</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
-    />
-    <link rel="stylesheet" href="./css/style.css" />
-  </head>
 
-  <body>
-    <nav class="navbar navbar-dark bg-dark navbar-expand-lg fixed-top">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">MessageApp</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="index.html"
-                >Trang chủ</a
-              >
-            </li>
-          </ul>
-          <div class="d-flex">
-            <a href="login.html" class="btn btn-outline-secondary me-2"
-              >Đăng nhập</a
-            >
-            <a href="register.html" class="btn btn-primary">Đăng ký</a>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng nhập</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+
+  <style>
+    body {
+      padding-top: 56px;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-dark bg-dark navbar-expand-lg fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">MessageApp</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="index.html">Trang chủ</a>
+          </li>
+        </ul>
+        <div class="d-flex">
+          <a href="login.html" class="btn btn-outline-secondary me-2">Đăng nhập</a>
+          <a href="register.html" class="btn btn-primary">Đăng ký</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section class="container mt-4">
+    <h2 class="display-6">Welcome to MessageApp</h2>
+    <p class="lead">MessageApp is a simple messaging app that allows you to send messages to your friends.</p>
+  </section>
+
+  <section class="container mt-4">
+    <a href="login.html" class="btn btn-primary">Đăng ký ngay</a>
+  </section>
+
+  <section class="container mt-4">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="card p-5">
+          <div class="card-img-top text-center">
+            <img src="app/img/comments.png" width="100px" alt="" srcset="">
+          </div>
+          <div class="card-body text-center">
+            <h5 class="card-title">Gửi và nhận tin nhắn</h5>
+            <p class="card-text">Dễ dàng và nhanh chóng</p>
           </div>
         </div>
       </div>
-    </nav>
+      <div class="col-md-4">
+        <div class="card p-5">
+          <div class="card-img-top text-center">
+            <img src="app/img/where.png" width="100px" alt="" srcset="">
+          </div>
+          <div class="card-body text-center">
+            <h5 class="card-title">Mọi lúc mọi nơi</h5>
+            <p class="card-text">Chỉ cần có kết nối internet</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-5">
+          <div class="card-img-top text-center">
+            <img src="app/img/support.png" width="100px" alt="" srcset="">
+          </div>
+          <div class="card-body text-center">
+            <h5 class="card-title">Kết bạn</h5>
+            <p class="card-text">Nhanh chóng và tiện lợi</p>
+          </div>
+        </div>
+      </div>
+  </section>
 
-    <script
-      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-      integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
-      integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
-      crossorigin="anonymous"
-    ></script>
-  </body>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+    integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+    crossorigin="anonymous"></script>
+</body>
+
 </html>
