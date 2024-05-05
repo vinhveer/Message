@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+</head>
+<body>
+    <input id="userIdInput" type="text" placeholder="Enter your user id here..." />
+    <input id="messageInput" type="text" placeholder="Type your message here..." />
+    <button id="sendButton">Send</button>
+    <div id="messages"></div>
+
+    <script>
+        var token = localStorage.getItem('token'); // Lấy token từ local storage
+        var socket = new WebSocket("ws://localhost:8080/ws", ['Bearer', token]);
+
+        socket.onopen = function(e) {
+            console.log("[open] Connection established");
+        };
+
+        socket.onmessage = function(event) {
+            var messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML += '<p>' + event.data + '</p>';
+            console.log(`[message] Data received from server: ${event.data}`);
+        };
+
+        socket.onerror = function(error) {
+            console.log(`[error] ${error.message}`);
+        };
+
+        document.getElementById('sendButton').addEventListener('click', function() {
+            var userIdInput = document.getElementById('userIdInput');
+            var messageInput = document.getElementById('messageInput');
+            var message = {
+                userId: userIdInput.value,
+                conservationId: "6635d2470ef989049c4d3459",
+                content: messageInput.value,
+                type: "text"
+            };
+            socket.send(JSON.stringify(message));
+            messageInput.value = '';
+        });
+    </script>
+</body>
+</html>
