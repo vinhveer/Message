@@ -107,7 +107,7 @@ html {
 
 .home .container .sidebar {
   flex: 2;
-  background-color: #fff;
+  background-color: #242526;
   position: relative;
 }
 
@@ -536,6 +536,7 @@ html {
   border-left: 1px solid #333333;
   background: #242526;
   flex: 5;
+  position: relative;
 }
 
 .home .container .chat .chatInfo {
@@ -1170,4 +1171,22 @@ html {
   position: absolute;
   display: none;
   background: #000;
+}
+
+#preview {
+  position: absolute;
+  bottom: 60px;
+  left: 20px;
+  width: 100px;
+  height: 100px;
+  /* background: rgba(0, 0, 0, 0.8); */
+  display: none;
+  z-index: 1000;
+}
+
+#preview img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
 }

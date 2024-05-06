@@ -1,48 +1,53 @@
-document.getElementById('loginForm').addEventListener('submit', function(event) {
+document
+  .getElementById("loginForm")
+  .addEventListener("submit", function (event) {
     // Ngăn chặn hành vi mặc định của form
     event.preventDefault();
 
     // Lấy dữ liệu từ form
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
     // Tạo đối tượng request
     const requestData = {
-        email: username,
-        password: password
+      email: email,
+      password: password,
     };
 
     // Thực hiện fetch API
-    fetch('http://localhost:8080/auth/authenticate', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData)
+    fetch("http://localhost:8080/auth/authenticate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestData),
     })
-    .then(response => {
+      .then((response) => {
         if (!response.ok || response.status !== 200) {
-            throw new Error('<div class="alert alert-danger" role="alert"><strong>Thông báo!</strong> Email hoặc mật khẩu không đúng.</div>');
+          throw new Error(
+            '<div class="alert alert-danger" role="alert"><strong>Thông báo!</strong> Email hoặc mật khẩu không đúng.</div>'
+          );
         }
         return response.json();
-    })
-    .then(data => {
+      })
+      .then((data) => {
         if (data && data.token) {
-            // Lưu token vào Storage
-            localStorage.setItem('token', data.token);
+          // Lưu token vào Storage
+          localStorage.setItem("token", data.token);
 
-            // Chuyển hướng trang
-            window.location.href = 'app/index.html';
+          // Chuyển hướng trang
+          window.location.href = "app/index.html";
         } else {
-            // Hiển thị thông báo lỗi
-            document.querySelector('.notification').innerHTML = '<div class="alert alert-danger" role="alert"><strong>Thông báo!</strong> Email hoặc mật khẩu không đúng.</div>';
+          // Hiển thị thông báo lỗi
+          document.querySelector(".notification").innerHTML =
+            '<div class="alert alert-danger" role="alert"><strong>Thông báo!</strong> Email hoặc mật khẩu không đúng.</div>';
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        document.querySelector('.notification').innerHTML = error.message;
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        document.querySelector(".notification").innerHTML = error.message;
 
         // Xóa token khỏi Local Storage
-        localStorage.removeItem('token');
-    });
-});
+        localStorage.removeItem("token");
+      });
+  });

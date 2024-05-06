@@ -60,6 +60,23 @@ logoutButton.addEventListener("click", function (event) {
 
   window.location.href = "../login.html";
 });
+
+//preview image
+document.getElementById("file").addEventListener("change", function (e) {
+  var file = e.target.files[0];
+  var reader = new FileReader();
+
+  reader.onloadend = function () {
+    document.getElementById("preview").style.display = "block";
+    document.querySelector("#preview img").src = reader.result;
+  };
+
+  if (file) {
+    reader.readAsDataURL(file);
+  } else {
+    document.getElementById("preview").style.display = "none";
+  }
+});
 //End UI LOGIC
 
 //FETCH API
@@ -153,23 +170,144 @@ async function displayChatInfo(friendId) {
     ? friend[0].avatar
     : "./img/noavatar.png";
 }
-// Fetch thông tin người dùng từ server
-async function fetchData() {
+
+async function fetchUser(email) {
   const user = await fetchApi(
     `http://localhost:8080/user/get_email?email=${email}`
   );
-
   document.querySelector(".nav-user span").textContent = user.fullName;
   document.querySelector(".nav-user img").src = user.avatar
     ? user.avatar
     : "img/noavatar.png";
-
   currentUserId = user.id;
   currentUserName = user.fullName;
-  const friendList = await fetchApi(
-    `http://localhost:8080/friendship/friends/${currentUserId}`
-  );
+  return user;
+}
 
+async function fetchFriends(userId) {
+  return await fetchApi(`http://localhost:8080/friendship/friends/${userId}`);
+}
+
+async function displayFirstFriend(friendDetails) {
+  if (friendDetails.length === 0) {
+    return;
+  }
+  const firstFriend = friendDetails[0];
+  let friendName = document.querySelector(".friend-name");
+  let friendAvatar = document.querySelector(".friend-avt img");
+  friendName.textContent = firstFriend[0].fullName;
+  friendAvatar.src = firstFriend[0].avatar
+    ? firstFriend[0].avatar
+    : "./img/noavatar.png";
+  displayChatInfo(firstFriend[0].id);
+  displayChatMessages(firstFriend[0].id, firstFriend[0].avatar);
+}
+async function createUserChatElement(friend, index, friendDetails) {
+  if (!friend[0]) {
+    return null;
+  }
+
+  let friendElement = document.createElement("div");
+  friendElement.classList.add("userChat");
+  if (friendDetails.length > 0 && index === 0) {
+    friendElement.classList.add("active");
+  }
+
+  // Add event listener for click event
+  friendElement.addEventListener("click", function () {
+    document.querySelectorAll(".userChat.active").forEach((activeElement) => {
+      activeElement.classList.remove("active");
+    });
+
+    this.classList.add("active");
+
+    displayChatInfo(friend[0].id);
+    displayChatMessages(friend[0].id, friend[0].avatar);
+
+    let friendName = document.querySelector(".friend-name");
+    let friendAvatar = document.querySelector(".friend-avt img");
+    friendName.textContent = friend[0].fullName;
+    friendAvatar.src = friend[0].avatar
+      ? friend[0].avatar
+      : "./img/noavatar.png";
+  });
+
+  let lastMessage;
+  // Add friend details to the friend element
+  if (friend[0]) {
+    friendElement.dataset.friendId = friend[0].id;
+
+    let imgElement = document.createElement("div");
+    imgElement.classList.add("userChat-img", "online");
+
+    let imgTag = document.createElement("img");
+    imgTag.src = friend[0].avatar ? friend[0].avatar : "./img/noavatar.png";
+    imgTag.alt = "User Photo";
+
+    imgElement.appendChild(imgTag);
+
+    let infoElement = document.createElement("div");
+    infoElement.classList.add("userChatInfo");
+
+    let nameElement = document.createElement("span");
+    nameElement.classList.add("userChatInfo-name");
+    nameElement.textContent = friend[0].fullName;
+
+    const conservation = await getConservation(friend[0].id);
+
+    const messages = await fetchApi(
+      `http://localhost:8080/message/get?conversationId=${conservation.id}`
+    );
+
+    lastMessage = messages[messages.length - 1];
+
+    let textElement = document.createElement("div");
+    textElement.classList.add("userChatInfo-text");
+
+    let p1 = document.createElement("p");
+    p1.textContent = lastMessage ? lastMessage.content : "Chưa có tin nhắn";
+
+    let messageDate;
+    if (lastMessage) {
+      messageDate = new Date(lastMessage.timestamp);
+    }
+
+    let p2 = document.createElement("p");
+    p2.textContent = messageDate
+      ? messageDate.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "";
+
+    textElement.appendChild(p1);
+    textElement.appendChild(p2);
+
+    infoElement.appendChild(nameElement);
+    infoElement.appendChild(textElement);
+
+    friendElement.appendChild(imgElement);
+    friendElement.appendChild(infoElement);
+  }
+
+  // Return the chat element and the timestamp of the last message
+  return {
+    chatElement: friendElement,
+    timestamp: lastMessage ? lastMessage.timestamp : null,
+  };
+}
+
+function populateChatContainer(userChatElements) {
+  const chatsContainer = document.querySelector("#chats");
+  chatsContainer.innerHTML = "";
+  userChatElements.forEach((friendElement) => {
+    chatsContainer.appendChild(friendElement);
+  });
+}
+
+async function fetchData() {
+  const user = await fetchUser(email);
+  const friendList = await fetchFriends(user.id);
   const friendDetails = await Promise.all(
     friendList.map((friend) => {
       const friendId =
@@ -179,117 +317,18 @@ async function fetchData() {
       return fetchApi(`http://localhost:8080/user/get_id?userId=${friendId}`);
     })
   );
-
-  const chatsContainer = document.querySelector("#chats");
-
-  chatsContainer.innerHTML = "";
-
-  if (friendDetails.length === 0) {
-    return;
-  }
-
-  const firstFriend = friendDetails[0];
-  let friendName = document.querySelector(".friend-name");
-  let friendAvatar = document.querySelector(".friend-avt img");
-  friendName.textContent = firstFriend[0].fullName;
-  friendAvatar.src = firstFriend[0].avatar
-    ? firstFriend[0].avatar
-    : "./img/noavatar.png";
-
-  displayChatInfo(firstFriend[0].id);
-  displayChatMessages(firstFriend[0].id, firstFriend[0].avatar);
-
-  // Thêm từng bạn bè vào danh sách
-  let userChatElements = [];
-  await Promise.all(
+  await displayFirstFriend(friendDetails);
+  let userChatElements = await Promise.all(
     friendDetails.map(async (friend, index) => {
-      let friendElement = document.createElement("div");
-      friendElement.classList.add("userChat");
-      if (friendDetails.length > 0 && index === 0) {
-        friendElement.classList.add("active");
-      }
-
-      friendElement.addEventListener("click", function () {
-        document
-          .querySelectorAll(".userChat.active")
-          .forEach((activeElement) => {
-            activeElement.classList.remove("active");
-          });
-
-        this.classList.add("active");
-
-        displayChatInfo(friend[0].id);
-        displayChatMessages(friend[0].id, friend[0].avatar);
-
-        friendName.textContent = friend[0].fullName;
-        friendAvatar.src = friend[0].avatar
-          ? friend[0].avatar
-          : "./img/noavatar.png";
-      });
-
-      if (friend[0]) {
-        friendElement.dataset.friendId = friend[0].id;
-
-        let imgElement = document.createElement("div");
-        imgElement.classList.add("userChat-img", "online");
-
-        let imgTag = document.createElement("img");
-        imgTag.src = friend[0].avatar ? friend[0].avatar : "./img/noavatar.png";
-        imgTag.alt = "User Photo";
-
-        imgElement.appendChild(imgTag);
-
-        let infoElement = document.createElement("div");
-        infoElement.classList.add("userChatInfo");
-
-        let nameElement = document.createElement("span");
-        nameElement.classList.add("userChatInfo-name");
-        nameElement.textContent = friend[0].fullName;
-
-        const conservation = await getConservation(friend[0].id);
-
-        const messages = await fetchApi(
-          `http://localhost:8080/message/get?conversationId=${conservation.id}`
-        );
-
-        let lastMessage = messages[messages.length - 1];
-
-        let textElement = document.createElement("div");
-        textElement.classList.add("userChatInfo-text");
-
-        let p1 = document.createElement("p");
-        p1.textContent = lastMessage ? lastMessage.content : "Chưa có tin nhắn";
-
-        let messageDate;
-        if (lastMessage) {
-          messageDate = new Date(lastMessage.timestamp);
-        }
-
-        let p2 = document.createElement("p");
-        p2.textContent = messageDate
-          ? messageDate.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-          : "";
-
-        textElement.appendChild(p1);
-        textElement.appendChild(p2);
-
-        infoElement.appendChild(nameElement);
-        infoElement.appendChild(textElement);
-
-        friendElement.appendChild(imgElement);
-        friendElement.appendChild(infoElement);
-
-        userChatElements[index] = friendElement;
-      }
+      return await createUserChatElement(friend, index, friendDetails);
     })
   );
 
-  userChatElements.forEach((friendElement) => {
-    chatsContainer.appendChild(friendElement);
-  });
+  userChatElements = userChatElements
+    .filter((element) => element !== null)
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+  populateChatContainer(userChatElements.map((element) => element.chatElement));
 
   if (friendDetails.length === 0) {
     document.querySelector(".info").classList.remove("active");
@@ -301,12 +340,54 @@ async function fetchData() {
 }
 
 fetchData().catch((error) => console.error(error));
+
+async function updateChatOrder() {
+  const activeUserChat = document.querySelector(".userChat.active");
+  const activeUserId = activeUserChat ? activeUserChat.dataset.friendId : null;
+
+  const user = await fetchUser(email);
+  const friendList = await fetchFriends(user.id);
+  const friendDetails = await Promise.all(
+    friendList.map((friend) => {
+      const friendId =
+        friend.receiverId === currentUserId
+          ? friend.senderId
+          : friend.receiverId;
+      return fetchApi(`http://localhost:8080/user/get_id?userId=${friendId}`);
+    })
+  );
+  let userChatElements = await Promise.all(
+    friendDetails.map(async (friend, index) => {
+      return await createUserChatElement(friend, index, friendDetails);
+    })
+  );
+
+  userChatElements = userChatElements
+    .filter((element) => element !== null)
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+  populateChatContainer(userChatElements.map((element) => element.chatElement));
+
+  document.querySelectorAll(".userChat.active").forEach((chatElement) => {
+    chatElement.classList.remove("active");
+  });
+
+  if (activeUserId) {
+    const activeUserChatElement = document.querySelector(
+      `.userChat[data-friend-id="${activeUserId}"]`
+    );
+    if (activeUserChatElement) {
+      activeUserChatElement.classList.add("active");
+    }
+  }
+}
+
 // SEND MESSAGE
 var messageInput = document.getElementById("i");
 var sendButton = document.querySelector(".input button");
 
 // Khởi tạo kết nối WebSocket với token xác thực trong header
-var socket = new WebSocket('ws://localhost:8080/ws');
+var socket = new WebSocket("ws://localhost:8080/ws");
 
 sendButton.addEventListener("click", async function (event) {
   event.preventDefault(); // Ngăn form gửi đi
@@ -340,61 +421,74 @@ sendButton.addEventListener("click", async function (event) {
 
   // Gửi tin nhắn qua WebSocket
   socket.send(JSON.stringify(newMessage));
-  
+
   // Hiển thị tin nhắn đã gửi
   displaySentMessage(newMessage);
-  
+
   messageInput.value = "";
+
+  await updateChatOrder();
 });
 
 // Thêm trình xử lý sự kiện cho sự kiện 'message' của WebSocket
-socket.onmessage = async function(event) {
+socket.onmessage = async function (event) {
   // Phân tích dữ liệu tin nhắn từ server
   var message = JSON.parse(event.data);
 
   // Hiển thị tin nhắn đã nhận
   displayReceiveMessages(message.userId, message.content);
+
+  await updateChatOrder();
 };
 
-
-function displayReceiveMessages(userId, content) {
+async function displayReceiveMessages(userId, content) {
+  const friend = await fetchApi(
+    `http://localhost:8080/user/get_id?userId=${userId}`
+  );
   const messagesContainer = document.querySelector(".messages");
 
-  const messageDiv = document.createElement("div");
-  messageDiv.classList.add("message");
+  // Get the chat element of the user who sent the message
+  const userChatElement = document.querySelector(
+    `.userChat[data-friend-id="${userId}"]`
+  );
 
-  const messageInfoDiv = document.createElement("div");
-  messageInfoDiv.classList.add("messageInfo");
+  // If the user who sent the message is the currently active user, display the message
+  if (userChatElement && userChatElement.classList.contains("active")) {
+    const messageDiv = document.createElement("div");
+    messageDiv.classList.add("message");
 
-  const avatarImg = document.createElement("img");
-  avatarImg.src = "./img/noavatar.png"; // Thay thế bằng avatar của người gửi
-  avatarImg.alt = "User Photo";
+    const messageInfoDiv = document.createElement("div");
+    messageInfoDiv.classList.add("messageInfo");
 
-  messageInfoDiv.appendChild(avatarImg);
-  messageDiv.appendChild(messageInfoDiv);
+    const avatarImg = document.createElement("img");
+    avatarImg.src = friend[0].avatar ? friend[0].avatar : "./img/noavatar.png";
+    avatarImg.alt = "User Photo";
 
-  const messageContentDiv = document.createElement("div");
-  messageContentDiv.classList.add("messageContent");
+    messageInfoDiv.appendChild(avatarImg);
+    messageDiv.appendChild(messageInfoDiv);
 
-  const contentParagraph = document.createElement("p");
-  contentParagraph.textContent = content;
+    const messageContentDiv = document.createElement("div");
+    messageContentDiv.classList.add("messageContent");
 
-  const timestampSpan = document.createElement("span");
-  const messageDate = new Date();
-  timestampSpan.textContent = messageDate.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+    const contentParagraph = document.createElement("p");
+    contentParagraph.textContent = content;
 
-  messageContentDiv.appendChild(contentParagraph);
-  messageContentDiv.appendChild(timestampSpan);
+    const timestampSpan = document.createElement("span");
+    const messageDate = new Date();
+    timestampSpan.textContent = messageDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
-  messageDiv.appendChild(messageContentDiv);
+    messageContentDiv.appendChild(contentParagraph);
+    messageContentDiv.appendChild(timestampSpan);
 
-  // Thêm tin nhắn vào phần tử gốc
-  messagesContainer.prepend(messageDiv);
+    messageDiv.appendChild(messageContentDiv);
+
+    // Add the message to the messages container
+    messagesContainer.prepend(messageDiv);
+  }
 }
-
 
 function displaySentMessage(message) {
   const messagesContainer = document.querySelector(".messages");
@@ -433,8 +527,6 @@ function displaySentMessage(message) {
   // Thêm tin nhắn vào phần tử gốc
   messagesContainer.prepend(messageDiv);
 }
-
-
 
 //Get conversation
 async function getConservation(friendId) {
@@ -756,6 +848,11 @@ function fetchAndDisplayContacts() {
 
 //display info user
 async function displayInfo(userId) {
+  if (userId === currentUserId) {
+    document.querySelector(".btn-list").style.display = "none";
+  } else {
+    document.querySelector(".btn-list").style.display = "flex";
+  }
   document.querySelector(".info-acc").style.display = "block";
   const user = await fetchApi(
     `http://localhost:8080/user/get_id?userId=${userId}`
