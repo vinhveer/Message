@@ -4,9 +4,7 @@
 
 ## Cách chạy dự án (Local)
 ### Cài đặt môi trường
-+ Để chạy được dự án, ta cần có:
-+ JDK 17 (Java Development Kit)
-+ Một ứng dụng để giả lập Server (Có thể dùng Go Live trong VSCode hoặc XAMPP)
++ Để chạy được dự án, ta cần có: JDK 17 (Java Development Kit)
 ### Set JAVA_HOME cho JDK 17.
 + Để chương trình có thể chạy được, ta phải setup JAVA_HOME trong phần `Edit environment variables for your account`, như video dưới đây
 
