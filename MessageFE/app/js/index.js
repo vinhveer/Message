@@ -275,9 +275,9 @@ async function createUserChatElement(friend, index, friendDetails) {
     let p2 = document.createElement("p");
     p2.textContent = messageDate
       ? messageDate.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
+        hour: "2-digit",
+        minute: "2-digit",
+      })
       : "";
 
     textElement.appendChild(p1);

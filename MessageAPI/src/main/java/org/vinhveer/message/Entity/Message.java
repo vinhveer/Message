@@ -24,6 +24,7 @@ public class Message {
         IMAGE,
         VIDEO,
         AUDIO,
-        FILE
+        FILE,
+        CALL
     }
 }
