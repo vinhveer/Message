@@ -1,6 +1,6 @@
 # Ứng dụng nhắn tin và gọi điện trực tuyến
 
-Link truy cập sản phẩm: [message](https://vinhveer.github.io/message/)
+Ứng dụng đã được deploy và có thể truy cập thông qua đường link: [message](https://vinhveer.github.io/message/)
 
 ## Cách chạy dự án (Local)
 ### Cài đặt môi trường
