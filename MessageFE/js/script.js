@@ -8,6 +8,8 @@ document
     var password1 = document.getElementById("password1").value;
     var password2 = document.getElementById("password2").value;
     var file = document.getElementById("file").files[0];
+    var gender = document.getElementById("gender").value === "male";
+    var dob = document.getElementById("dob").value;
 
     if (password1 !== password2) {
       alert("Mật khẩu không khớp!");
@@ -31,8 +33,8 @@ document
       .then((avatar) => {
         var registerData = {
           fullName: username,
-          gender: false,
-          dateOfBirth: "2004-07-01",
+          gender: gender,
+          dateOfBirth: dob,
           email: email,
           avatar: avatar,
           password: password1,

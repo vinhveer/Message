@@ -43,57 +43,88 @@
       </div>
     </nav>
 
-    <div class="container">
-      <h3>Đăng ký</h3>
+    <div class="container mt-3">
+      <h3 class="m-0">Đăng ký</h3>
       <hr />
       <form id="register">
-        <div class="mb-3">
+        <div class="">
           <label for="username" class="form-label">Họ và tên</label>
           <input
             type="text"
-            class="form-control"
+            class="form-control p-2 mb-2"
             id="username"
             placeholder="example"
             name="username"
             required
           />
         </div>
-        <div class="mb-3">
+        <div class="">
           <label for="email" class="form-label">Email</label>
           <input
             type="email"
-            class="form-control"
+            class="form-control p-2 mb-2"
             id="email"
             placeholder="example@example.com"
             name="email"
             required
           />
         </div>
-        <div class="mb-3">
+        <div class="">
           <label for="password1" class="form-label">Mật khẩu</label>
           <input
             type="password"
-            class="form-control"
+            class="form-control p-2 mb-2"
             id="password1"
             name="password1"
             placeholder="@password"
             required
           />
         </div>
-        <div class="mb-3">
+        <div class="">
           <label for="password2" class="form-label">Nhập lại mật khẩu</label>
           <input
             type="password"
-            class="form-control"
+            class="form-control p-2 mb-2"
             id="password2"
             name="password2"
             placeholder="@password"
             required
           />
         </div>
-        <div class="mb-3">
+        <div class="">
           <label for="file" class="form-label">Tải lên ảnh đại diện</label>
-          <input type="file" class="form-control" id="file" name="file" />
+          <input
+            type="file"
+            class="form-control p-2 mb-2"
+            id="file"
+            name="file"
+          />
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <label for="gender" class="form-label">Giới tính</label>
+            <select
+              class="form-control p-2 mb-2"
+              id="gender"
+              name="gender"
+              required
+            >
+              <option selected>Chọn...</option>
+              <option value="male">Nam</option>
+              <option value="female">Nữ</option>
+              <option value="other">Khác</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="dob" class="form-label">Ngày sinh</label>
+            <input
+              type="date"
+              class="form-control p-2 mb-2"
+              id="dob"
+              name="dob"
+              required
+            />
+          </div>
         </div>
 
         <button type="submit" class="btn btn-primary" id="register-btn">
