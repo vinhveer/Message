@@ -77,6 +77,19 @@ document.getElementById("file").addEventListener("change", function (e) {
     document.getElementById("preview").style.display = "none";
   }
 });
+
+//remove preview image
+document
+  .querySelector("#remove-preview")
+  .addEventListener("click", function () {
+    document.querySelector("#preview img").src = "";
+    document.getElementById("preview").style.display = "none";
+  });
+
+//close modal info-user
+document.querySelector("#close-info").addEventListener("click", function () {
+  document.querySelector(".info-acc").style.display = "none";
+});
 //End UI LOGIC
 
 //FETCH API
@@ -265,7 +278,11 @@ async function createUserChatElement(friend, index, friendDetails) {
     textElement.classList.add("userChatInfo-text");
 
     let p1 = document.createElement("p");
-    p1.textContent = lastMessage ? lastMessage.content : "Chưa có tin nhắn";
+    p1.textContent = lastMessage
+      ? lastMessage.type === "IMAGE"
+        ? "Đã gửi một hình ảnh"
+        : lastMessage.content
+      : "Chưa có tin nhắn";
 
     let messageDate;
     if (lastMessage) {
@@ -275,9 +292,9 @@ async function createUserChatElement(friend, index, friendDetails) {
     let p2 = document.createElement("p");
     p2.textContent = messageDate
       ? messageDate.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+          hour: "2-digit",
+          minute: "2-digit",
+        })
       : "";
 
     textElement.appendChild(p1);
@@ -385,50 +402,117 @@ async function updateChatOrder() {
 // SEND MESSAGE
 var messageInput = document.getElementById("i");
 var sendButton = document.querySelector(".input button");
+var fileInput = document.getElementById("file");
+var selectedFile;
 
 // Khởi tạo kết nối WebSocket với token xác thực trong header
 var socket = new WebSocket("ws://localhost:8080/ws");
 
-sendButton.addEventListener("click", async function (event) {
-  event.preventDefault(); // Ngăn form gửi đi
+fileInput.addEventListener("change", function (event) {
+  event.preventDefault();
 
-  // Kiểm tra xem một cuộc trò chuyện có được chọn không
-  var activeUserChat = document.querySelector(".userChat.active");
+  // Check if a file was selected
+  if (this.files && this.files[0]) {
+    selectedFile = this.files[0];
+  }
+});
+
+async function handleSendButtonClick(event) {
+  event.preventDefault();
+
+  var activeUserChat = getActiveUserChat();
   if (!activeUserChat) {
     alert("Vui lòng chọn một cuộc trò chuyện để gửi tin nhắn.");
     return;
   }
 
-  // Lấy nội dung tin nhắn từ input
+  var friendId = getFriendId(activeUserChat);
+
+  const conservation = await getConservation(friendId);
+
+  var newMessage = createNewMessage(conservation.id);
+
+  if (selectedFile) {
+    await handleFileUpload(newMessage);
+  } else {
+    await handleTextMessage(newMessage);
+  }
+
+  await updateChatOrder();
+}
+
+function getActiveUserChat() {
+  return document.querySelector(".userChat.active");
+}
+
+function getFriendId(activeUserChat) {
+  return activeUserChat.dataset.friendId;
+}
+
+function createNewMessage(conservationId) {
+  return {
+    conservationId: conservationId,
+    userId: currentUserId,
+  };
+}
+
+async function handleFileUpload(newMessage) {
+  var formData = new FormData();
+  formData.append("file", selectedFile);
+
+  try {
+    const response = await fetch("http://localhost:8080/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Lỗi khi tải lên ảnh");
+    }
+
+    const imageUrl = await response.text();
+
+    newMessage.type = "IMAGE";
+    newMessage.content = imageUrl;
+
+    sendMessage(newMessage);
+
+    displaySentMessage(newMessage);
+  } catch (error) {
+    console.error("Error:", error);
+    alert(error.message);
+  }
+
+  // Clear the selected file
+  selectedFile = null;
+
+  document.querySelector("#preview img").src = "";
+  document.querySelector("#preview").style.display = "none";
+}
+
+async function handleTextMessage(newMessage) {
   var message = messageInput.value;
   if (message === "") {
     alert("Vui lòng nhập nội dung tin nhắn.");
     return;
   }
 
-  // Lấy id của người nhận tin nhắn
-  var friendId = activeUserChat.dataset.friendId;
+  newMessage.type = "TEXT";
+  newMessage.content = message;
 
-  const conservation = await getConservation(friendId);
+  sendMessage(newMessage);
 
-  // Tạo đối tượng tin nhắn mới
-  var newMessage = {
-    conservationId: conservation.id,
-    userId: currentUserId,
-    type: "TEXT",
-    content: message,
-  };
-
-  // Gửi tin nhắn qua WebSocket
-  socket.send(JSON.stringify(newMessage));
-
-  // Hiển thị tin nhắn đã gửi
   displaySentMessage(newMessage);
 
   messageInput.value = "";
+}
 
-  await updateChatOrder();
-});
+function sendMessage(newMessage) {
+  // Gửi tin nhắn qua WebSocket
+  socket.send(JSON.stringify(newMessage));
+}
+
+sendButton.addEventListener("click", handleSendButtonClick);
 
 // Thêm trình xử lý sự kiện cho sự kiện 'message' của WebSocket
 socket.onmessage = async function (event) {
@@ -436,12 +520,12 @@ socket.onmessage = async function (event) {
   var message = JSON.parse(event.data);
 
   // Hiển thị tin nhắn đã nhận
-  displayReceiveMessages(message.userId, message.content);
+  displayReceiveMessages(message.userId, message.content, message.type);
 
   await updateChatOrder();
 };
 
-async function displayReceiveMessages(userId, content) {
+async function displayReceiveMessages(userId, content, type) {
   const friend = await fetchApi(
     `http://localhost:8080/user/get_id?userId=${userId}`
   );
@@ -470,8 +554,15 @@ async function displayReceiveMessages(userId, content) {
     const messageContentDiv = document.createElement("div");
     messageContentDiv.classList.add("messageContent");
 
-    const contentParagraph = document.createElement("p");
-    contentParagraph.textContent = content;
+    if (type === "TEXT") {
+      const contentParagraph = document.createElement("p");
+      contentParagraph.textContent = content;
+      messageContentDiv.appendChild(contentParagraph);
+    } else if (type === "IMAGE") {
+      const imageElement = document.createElement("img");
+      imageElement.src = content;
+      messageContentDiv.appendChild(imageElement);
+    }
 
     const timestampSpan = document.createElement("span");
     const messageDate = new Date();
@@ -480,7 +571,6 @@ async function displayReceiveMessages(userId, content) {
       minute: "2-digit",
     });
 
-    messageContentDiv.appendChild(contentParagraph);
     messageContentDiv.appendChild(timestampSpan);
 
     messageDiv.appendChild(messageContentDiv);
@@ -500,7 +590,7 @@ function displaySentMessage(message) {
   messageInfoDiv.classList.add("messageInfo");
 
   const avatarImg = document.createElement("img");
-  avatarImg.src = "./img/noavatar.png"; // Thay thế bằng avatar của người gửi
+  avatarImg.src = "./img/noavatar.png";
   avatarImg.alt = "User Photo";
 
   messageInfoDiv.appendChild(avatarImg);
@@ -509,8 +599,15 @@ function displaySentMessage(message) {
   const messageContentDiv = document.createElement("div");
   messageContentDiv.classList.add("messageContent");
 
-  const contentParagraph = document.createElement("p");
-  contentParagraph.textContent = message.content;
+  if (message.type === "TEXT") {
+    const contentParagraph = document.createElement("p");
+    contentParagraph.textContent = message.content;
+    messageContentDiv.appendChild(contentParagraph);
+  } else if (message.type === "IMAGE") {
+    const imageElement = document.createElement("img");
+    imageElement.src = message.content;
+    messageContentDiv.appendChild(imageElement);
+  }
 
   const timestampSpan = document.createElement("span");
   const messageDate = new Date();
@@ -519,7 +616,6 @@ function displaySentMessage(message) {
     minute: "2-digit",
   });
 
-  messageContentDiv.appendChild(contentParagraph);
   messageContentDiv.appendChild(timestampSpan);
 
   messageDiv.appendChild(messageContentDiv);
@@ -540,12 +636,8 @@ async function getConservation(friendId) {
 
   return conservation[0];
 }
-
-//DISPLAY MESSAGE
 async function displayChatMessages(friendId, friendAvatar) {
-  // console.log(friendId);
   const conservation = await getConservation(friendId);
-  // console.log(conservation.id, friendId);
   const messages = await fetchApi(
     `http://localhost:8080/message/get?conversationId=${conservation.id}`
   );
@@ -571,8 +663,15 @@ async function displayChatMessages(friendId, friendAvatar) {
     const messageContentDiv = document.createElement("div");
     messageContentDiv.classList.add("messageContent");
 
-    const contentParagraph = document.createElement("p");
-    contentParagraph.textContent = message.content;
+    if (message.type === "TEXT") {
+      const contentParagraph = document.createElement("p");
+      contentParagraph.textContent = message.content;
+      messageContentDiv.appendChild(contentParagraph);
+    } else if (message.type === "IMAGE") {
+      const imageElement = document.createElement("img");
+      imageElement.src = message.content;
+      messageContentDiv.appendChild(imageElement);
+    }
 
     const timestampSpan = document.createElement("span");
     const messageDate = new Date(message.timestamp);
@@ -581,7 +680,6 @@ async function displayChatMessages(friendId, friendAvatar) {
       minute: "2-digit",
     });
 
-    messageContentDiv.appendChild(contentParagraph);
     messageContentDiv.appendChild(timestampSpan);
 
     messageDiv.appendChild(messageContentDiv);
@@ -589,7 +687,6 @@ async function displayChatMessages(friendId, friendAvatar) {
       messageDiv.classList.add("owner");
     }
 
-    // Thêm tin nhắn vào phần tử gốc
     messagesContainer.prepend(messageDiv);
   });
 
@@ -879,11 +976,7 @@ infoFriendBtn.addEventListener("click", function () {
   displayInfo(friendId);
 });
 
-//close modal info-user
-document.querySelector("#close-info").addEventListener("click", function () {
-  document.querySelector(".info-acc").style.display = "none";
-});
-
+//Video Call ZEGOCLOUD
 function getUrlParams(url = window.location.href) {
   let urlStr = url.split("?")[1];
   return new URLSearchParams(urlStr);

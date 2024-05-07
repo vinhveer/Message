@@ -1,73 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Messsage App</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
-    rel="stylesheet" />
-  <link href="
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Messsage App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="
     https://cdn.jsdelivr.net/npm/reset-css@5.0.2/reset.min.css
-    " rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="./css/main.css" />
-</head>
+    "
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/main.css" />
+  </head>
 
-<body>
-  <div class="home">
-    <div class="container">
-      <div class="sidebar">
-        <div class="navbar-header">
-          <div class="nav-user">
-            <img src="./img/noavatar.png" alt="" />
-            <span></span>
-            <div class="dropdown-menu">
-              <a id="info-user" href="#">
-                <i class="fa-solid fa-user"></i>
-                <p>Thông tin cá nhân</p>
-              </a>
-              <a href="#">
-                <i class="fa-solid fa-gear"></i>
-                <p>Cài đặt</p>
-              </a>
-              <hr />
-              <a href="#"><i class="fa-solid fa-right-from-bracket"></i>
-                <p>Đăng xuất</p>
-              </a>
+  <body>
+    <div class="home">
+      <div class="container">
+        <div class="sidebar">
+          <div class="navbar-header">
+            <div class="nav-user">
+              <img src="./img/noavatar.png" alt="" />
+              <span></span>
+              <div class="dropdown-menu">
+                <a id="info-user" href="#">
+                  <i class="fa-solid fa-user"></i>
+                  <p>Thông tin cá nhân</p>
+                </a>
+                <a href="#">
+                  <i class="fa-solid fa-gear"></i>
+                  <p>Cài đặt</p>
+                </a>
+                <hr />
+                <a href="#"
+                  ><i class="fa-solid fa-right-from-bracket"></i>
+                  <p>Đăng xuất</p>
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="btns-switch">
-          <button class="btn-switch active">
-            <i class="fa-solid fa-comments"></i>
-            <span>Chat</span>
-          </button>
-          <button class="btn-switch">
-            <i class="fa-solid fa-video"></i>
-            <span>Calls</span>
-          </button>
-          <button class="btn-switch">
-            <i class="fa-solid fa-address-book"></i>
-            <span>Contacts</span>
-          </button>
-          <button class="btn-switch">
-            <i class="fa-regular fa-calendar-check"></i>
-            <span>Today</span>
-          </button>
-        </div>
-        <div class="search">
-          <div class="searchForm">
-            <i class="bx bx-search-alt-2"></i>
-            <label for="search" class="visually-hidden">Search User:</label>
-            <input type="text" id="search" placeholder="Find a user" />
+          <div class="btns-switch">
+            <button class="btn-switch active">
+              <i class="fa-solid fa-comments"></i>
+              <span>Chat</span>
+            </button>
+            <button class="btn-switch">
+              <i class="fa-solid fa-video"></i>
+              <span>Calls</span>
+            </button>
+            <button class="btn-switch">
+              <i class="fa-solid fa-address-book"></i>
+              <span>Contacts</span>
+            </button>
+            <button class="btn-switch">
+              <i class="fa-regular fa-calendar-check"></i>
+              <span>Today</span>
+            </button>
           </div>
-          <div class="find-user">
-            <p id="userNotFound">User not found!</p>
-            <!-- <div class="user-friend">
+          <div class="search">
+            <div class="searchForm">
+              <i class="bx bx-search-alt-2"></i>
+              <label for="search" class="visually-hidden">Search User:</label>
+              <input type="text" id="search" placeholder="Find a user" />
+            </div>
+            <div class="find-user">
+              <p id="userNotFound">User not found!</p>
+              <!-- <div class="user-friend">
                 <div class="userChat-img">
                   <img
                     src="https://images.pexels.com/photos/8405873/pexels-photo-8405873.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load"
@@ -82,11 +93,11 @@
                   </div>
                 </div>
               </div> -->
+            </div>
           </div>
-        </div>
-        <div id="chats" class="chats"></div>
-        <div id="contacts" class="contacts">
-          <!-- <div class="user-friend">
+          <div id="chats" class="chats"></div>
+          <div id="contacts" class="contacts">
+            <!-- <div class="user-friend">
               <div class="userChat-img">
                 <img
                   src="https://images.pexels.com/photos/8405873/pexels-photo-8405873.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load"
@@ -101,43 +112,48 @@
                 </div>
               </div>
             </div> -->
-        </div>
-      </div>
-
-      <!-- Chat -->
-      <div class="chat">
-        <div class="chatInfo">
-          <div class="chatInfo-content">
-            <div class="chatInfo-avt online">
-              <img src="./img/noavatar.png" alt="No avatar" />
-            </div>
-            <div class="chatInfo-text">
-              <span></span>
-              <span>Đang hoạt động</span>
-            </div>
           </div>
-          <div class="chatIcons">
-            <div class="search-box">
-              <button class="btn-search">
-                <i class="bx bx-search-alt-2"></i>
+        </div>
+
+        <!-- Chat -->
+        <div class="chat">
+          <div class="chatInfo">
+            <div class="chatInfo-content">
+              <div class="chatInfo-avt online">
+                <img src="./img/noavatar.png" alt="No avatar" />
+              </div>
+              <div class="chatInfo-text">
+                <span></span>
+                <span>Đang hoạt động</span>
+              </div>
+            </div>
+            <div class="chatIcons">
+              <div class="search-box">
+                <button class="btn-search">
+                  <i class="bx bx-search-alt-2"></i>
+                </button>
+                <label for="input-search" class="visually-hidden">Search</label>
+                <input
+                  type="text"
+                  class="input-search"
+                  id="input-search"
+                  placeholder="Type to Search..."
+                />
+              </div>
+              <button class="wrap-img-icon">
+                <i class="bx bxs-phone"></i>
               </button>
-              <label for="input-search" class="visually-hidden">Search</label>
-              <input type="text" class="input-search" id="input-search" placeholder="Type to Search..." />
-            </div>
-            <button class="wrap-img-icon">
-              <i class="bx bxs-phone"></i>
-            </button>
-            <button id="call" class="wrap-img-icon">
-              <img src="./img/cam.png" alt="" />
-            </button>
+              <button id="call" class="wrap-img-icon">
+                <img src="./img/cam.png" alt="" />
+              </button>
 
-            <button id="toggleInfo" class="wrap-img-icon">
-              <img src="./img/more.png" alt="" />
-            </button>
+              <button id="toggleInfo" class="wrap-img-icon">
+                <img src="./img/more.png" alt="" />
+              </button>
+            </div>
           </div>
-        </div>
-        <div class="messages">
-          <!-- <div class="message owner">
+          <div class="messages">
+            <!-- <div class="message owner">
               <div class="messageInfo">
                 <img src="./img/noavatar.png" alt="" />
               </div>
@@ -157,133 +173,140 @@
                 <span>10:23</span>
               </div>
             </div> -->
+          </div>
+
+          <form class="input" method="post" enctype="multipart/form-data">
+            <div class="send">
+              <i class="fa-solid fa-paperclip"></i>
+              <input type="file" style="display: none" id="file" />
+              <label for="file">
+                <i class="fa-regular fa-image"></i>
+              </label>
+            </div>
+            <label for="i" class="visually-hidden">input</label>
+            <input type="text" placeholder="Aa" id="i" />
+            <button><i class="bx bxs-send"></i></button>
+          </form>
+          <div id="preview">
+            <img /><button id="remove-preview">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
         </div>
 
-        <form class="input" method="post" enctype="multipart/form-data">
-          <div class="send">
-            <i class="fa-solid fa-paperclip"></i>
-            <input type="file" style="display: none" id="file" />
-            <label for="file">
-              <i class="fa-regular fa-image"></i>
-            </label>
-          </div>
-          <label for="i" class="visually-hidden">input</label>
-          <input type="text" placeholder="Aa" id="i" />
-          <button><i class="bx bxs-send"></i></button>
-        </form>
-        <div id="preview"><img /></div>
-      </div>
+        <div class="info">
+          <h2 class="info-title">Thông tin hội thoại</h2>
+          <div class="friend">
+            <div class="friend-avt">
+              <img src="./img/noavatar.png" alt="No avatar" />
+            </div>
+            <div class="friend-name"></div>
+            <div class="friend-onl">Đang hoạt động</div>
 
-      <div class="info">
-        <h2 class="info-title">Thông tin hội thoại</h2>
-        <div class="friend">
-          <div class="friend-avt">
-            <img src="./img/noavatar.png" alt="No avatar" />
-          </div>
-          <div class="friend-name"></div>
-          <div class="friend-onl">Đang hoạt động</div>
-
-          <div class="info-icon-list">
-            <div class="wrap-icon">
-              <div class="wrap-i">
-                <i id="info-friend" class="bx bx-user-circle"></i>
+            <div class="info-icon-list">
+              <div class="wrap-icon">
+                <div class="wrap-i">
+                  <i id="info-friend" class="bx bx-user-circle"></i>
+                </div>
+                <span
+                  >Trang cá <br />
+                  nhân</span
+                >
               </div>
-              <span>Trang cá <br />
-                nhân</span>
-            </div>
-            <div class="wrap-icon">
-              <div class="wrap-i"><i class="bx bxs-bell"></i></div>
-              <span>Tắt thông <br />
-                báo</span>
+              <div class="wrap-icon">
+                <div class="wrap-i"><i class="bx bxs-bell"></i></div>
+                <span
+                  >Tắt thông <br />
+                  báo</span
+                >
+              </div>
             </div>
           </div>
-        </div>
-        <div class="func-list">
-          <div class="func-item">
-            <i class="bx bx-edit-alt"></i>
-            <span>Chỉnh sửa biệt danh</span>
-          </div>
+          <div class="func-list">
+            <div class="func-item">
+              <i class="bx bx-edit-alt"></i>
+              <span>Chỉnh sửa biệt danh</span>
+            </div>
 
-          <div class="func-item">
-            <i class="bx bx-images"></i>
-            <span>Hình ảnh</span>
-          </div>
-          <div class="func-item">
-            <i class="bx bxs-file"></i>
-            <span>File</span>
-          </div>
-          <div class="func-item">
-            <i class="bx bx-low-vision"></i>
-            <span>Ẩn trò chuyện</span>
-          </div>
-          <!-- <div class="func-item">
+            <div class="func-item">
+              <i class="bx bx-images"></i>
+              <span>Hình ảnh</span>
+            </div>
+            <div class="func-item">
+              <i class="bx bxs-file"></i>
+              <span>File</span>
+            </div>
+            <div class="func-item">
+              <i class="bx bx-low-vision"></i>
+              <span>Ẩn trò chuyện</span>
+            </div>
+            <!-- <div class="func-item">
                   <i class="bx bx-message-rounded-x"></i>
                   <span>Hạn chế</span>
                 </div> -->
-          <div class="func-item">
-            <i class="bx bx-block"></i>
-            <span>Chặn</span>
-          </div>
-          <div class="func-item">
-            <i class="bx bx-error"></i>
-            <span>Báo cáo</span>
-          </div>
-          <div class="func-item">
-            <i class="bx bx-trash"></i>
-            <span>Xóa lịch sử trò chuyện</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="info-acc">
-    <div class="wrap">
-      <div class="header">
-        <h2 class="header-title">Thông tin tài khoản</h2>
-        <i id="close-info" class="bx bx-x"></i>
-      </div>
-
-      <div class="bg-info">
-        <img src="./img/background.jpg" alt="" />
-      </div>
-
-      <div class="info-avt-wrap">
-        <div class="avt-user">
-          <img src="./img/noavatar.png" alt="" />
-        </div>
-        <span></span>
-        <i class="bx bx-edit-alt"></i>
-      </div>
-
-      <div class="btn-list">
-        <button class="btn-info">Gọi điện</button>
-        <button class="btn-info">Nhắn tin</button>
-      </div>
-      <div class="personal-info">
-        <div class="personal-title">Thông tin cá nhân</div>
-
-        <div class="personal-content">
-          <div class="personal-item">
-            <div class="personal-label">Ngày sinh:</div>
-            <div id="dob" class="personal-value"></div>
-          </div>
-          <div class="personal-item">
-            <div class="personal-label">Giới tính:</div>
-            <div id="gender" class="personal-value"></div>
-          </div>
-          <div class="personal-item">
-            <div class="personal-label">Email:</div>
-            <div id="email" class="personal-value"></div>
+            <div class="func-item">
+              <i class="bx bx-block"></i>
+              <span>Chặn</span>
+            </div>
+            <div class="func-item">
+              <i class="bx bx-error"></i>
+              <span>Báo cáo</span>
+            </div>
+            <div class="func-item">
+              <i class="bx bx-trash"></i>
+              <span>Xóa lịch sử trò chuyện</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <div id="root"></div>
 
-  <script src="https://unpkg.com/@zegocloud/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
-  <script src="js/index.js"></script>
-</body>
+    <div class="info-acc">
+      <div class="wrap">
+        <div class="header">
+          <h2 class="header-title">Thông tin tài khoản</h2>
+          <i id="close-info" class="bx bx-x"></i>
+        </div>
 
+        <div class="bg-info">
+          <img src="./img/background.jpg" alt="" />
+        </div>
+
+        <div class="info-avt-wrap">
+          <div class="avt-user">
+            <img src="./img/noavatar.png" alt="" />
+          </div>
+          <span></span>
+          <i class="bx bx-edit-alt"></i>
+        </div>
+
+        <div class="btn-list">
+          <button class="btn-info">Gọi điện</button>
+          <button class="btn-info">Nhắn tin</button>
+        </div>
+        <div class="personal-info">
+          <div class="personal-title">Thông tin cá nhân</div>
+
+          <div class="personal-content">
+            <div class="personal-item">
+              <div class="personal-label">Ngày sinh:</div>
+              <div id="dob" class="personal-value"></div>
+            </div>
+            <div class="personal-item">
+              <div class="personal-label">Giới tính:</div>
+              <div id="gender" class="personal-value"></div>
+            </div>
+            <div class="personal-item">
+              <div class="personal-label">Email:</div>
+              <div id="email" class="personal-value"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/@zegocloud/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
+    <script src="js/index.js"></script>
+  </body>
 </html>
