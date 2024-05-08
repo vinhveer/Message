@@ -1,7 +1,5 @@
 # Ứng dụng nhắn tin và gọi điện trực tuyến
 
-Ứng dụng đã được deploy và có thể truy cập thông qua đường link: [message](https://vinhveer.github.io/message/)
-
 ## Cách chạy dự án (Local)
 ### Cài đặt môi trường
 + Để chạy được dự án, ta cần có: JDK 17 (Java Development Kit)
